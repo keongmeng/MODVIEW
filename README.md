@@ -5,6 +5,8 @@
 
 > 纯 Python，无引擎依赖；打包成单文件 exe 后直接双击运行。
 
+**[⬇ 下载 Windows x64 单文件版](https://github.com/keongmeng/MODVIEW/releases/latest)** —— 免安装 Python，双击即用。
+
 ---
 
 ## 功能
