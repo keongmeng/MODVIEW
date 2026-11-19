@@ -7,6 +7,10 @@
 
 **[⬇ 下载 Windows x64 单文件版](https://github.com/keongmeng/MODVIEW/releases/latest)** —— 免安装 Python，双击即用。
 
+English: [README.en.md](README.en.md)
+
+![MODVIEW 主界面](docs/screenshots/main.png)
+
 ---
 
 ## 功能
