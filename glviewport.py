@@ -2442,7 +2442,7 @@ class GLViewport(tk.Frame):
     # ---------------------------------------------------------------- 导出 UV 布局
     def uv_layout_rgba(self, out_w, out_h, opacity=1.0, line_px=None, color=(1.0, 1.0, 1.0),
                        fill=True, fill_color=(0.72, 0.74, 0.80),
-                       line_alpha=1.0, fill_alpha=1.0):
+                       line_alpha=1.0, fill_alpha=1.0, fit=False):
         """离屏渲染 UV 线框 + 岛内填充到 RGBA 缓冲区（背景全透明）。
 
         分两趟画成「覆盖度遮罩」（线一趟、填充一趟，都是不透明白），
@@ -2507,8 +2507,13 @@ class GLViewport(tk.Frame):
 
         def _screen(uv):
             a = np.asarray(uv, float).reshape(-1, 3, 2)
-            xs = mx + (a[..., 0] - cx) * scale
-            ys = my + (a[..., 1] - cy) * scale
+            if fit:
+                xs = mx + (a[..., 0] - cx) * scale
+                ys = my + (a[..., 1] - cy) * scale
+            else:
+                # 0~1 UV 空间 1:1 铺满整张图（和贴图对齐，Blender 的 UV 导出也是这个行为）
+                xs = a[..., 0] * rw
+                ys = a[..., 1] * rh
             return np.stack([xs, ys], axis=-1)
 
         def _run_pass(mode):

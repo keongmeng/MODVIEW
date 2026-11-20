@@ -430,3 +430,55 @@
 [21:19:02] 定位器 13 个，线顶点 26 三角顶点 468
 [21:19:03] 定位器 13 个，线顶点 26 三角顶点 468
 [21:19:03] 定位器 13 个，线顶点 26 三角顶点 468
+[21:23:41] ==================================================
+[21:23:41] GLViewport 创建, pid=46240
+[21:23:41] 日志文件: F:\WorkBuddy\2026-11-10-23-52-40\modview-v169\modview_debug.log
+[21:23:41] redraw: 跳过（GL 未就绪）
+[21:23:42] --- _init_gl 开始 ---
+[21:23:42] winfo: 420x320  hwnd=39461160
+[21:23:42] hdc=939606097
+[21:23:42] STENCIL_BITS = 8
+[21:23:42] GL_VERSION  = b'4.6.0 NVIDIA 621.14'
+[21:23:42] GL_RENDERER = b'NVIDIA GeForce RTX 2080 Ti/PCIe/SSE2'
+[21:23:42] glGetError  = 0
+[21:23:42] 窗口过程已接管，old=140705639808320
+[21:23:42] 开始上传 12 个网格
+[21:23:42]   上传 Tracks: verts=544->1632 faces=816 has_uv=True
+[21:23:42]   上传 FrontWheels: verts=84->180 faces=160 has_uv=True
+[21:23:42]   上传 FrontWheels.001: verts=320->512 faces=632 has_uv=True
+[21:23:42]   上传 FrontWheels.002: verts=320->512 faces=632 has_uv=True
+[21:23:42]   上传 FrontWheels.003: verts=320->512 faces=632 has_uv=True
+[21:23:42]   上传 FrontWheels.004: verts=320->512 faces=632 has_uv=True
+[21:23:42]   上传 FrontWheels.005: verts=320->512 faces=632 has_uv=True
+[21:23:42]   上传 Basis: verts=1829->3443 faces=3456 has_uv=True
+[21:23:42]   上传 Turret: verts=2360->3496 faces=4274 has_uv=True
+[21:23:42]   上传 MainBarrel: verts=729->851 faces=1326 has_uv=True
+[21:23:42]   上传 MachineGun: verts=215->271 faces=270 has_uv=True
+[21:23:42]   上传 FrontWheels.006: verts=84->180 faces=160 has_uv=True
+[21:23:42] ready=True, 调用 redraw
+[21:24:02] ==================================================
+[21:24:02] GLViewport 创建, pid=15924
+[21:24:02] 日志文件: F:\WorkBuddy\2026-11-10-23-52-40\modview-v169\modview_debug.log
+[21:24:03] redraw: 跳过（GL 未就绪）
+[21:24:03] --- _init_gl 开始 ---
+[21:24:03] winfo: 1x1  hwnd=47982120
+[21:24:03] hdc=939606097
+[21:24:04] STENCIL_BITS = 8
+[21:24:04] GL_VERSION  = b'4.6.0 NVIDIA 621.14'
+[21:24:04] GL_RENDERER = b'NVIDIA GeForce RTX 2080 Ti/PCIe/SSE2'
+[21:24:04] glGetError  = 0
+[21:24:04] 窗口过程已接管，old=140705639808320
+[21:24:04] 开始上传 12 个网格
+[21:24:04]   上传 Tracks: verts=544->1632 faces=816 has_uv=True
+[21:24:04]   上传 FrontWheels: verts=84->180 faces=160 has_uv=True
+[21:24:04]   上传 FrontWheels.001: verts=320->512 faces=632 has_uv=True
+[21:24:04]   上传 FrontWheels.002: verts=320->512 faces=632 has_uv=True
+[21:24:04]   上传 FrontWheels.003: verts=320->512 faces=632 has_uv=True
+[21:24:04]   上传 FrontWheels.004: verts=320->512 faces=632 has_uv=True
+[21:24:04]   上传 FrontWheels.005: verts=320->512 faces=632 has_uv=True
+[21:24:04]   上传 Basis: verts=1829->3443 faces=3456 has_uv=True
+[21:24:04]   上传 Turret: verts=2360->3496 faces=4274 has_uv=True
+[21:24:04]   上传 MainBarrel: verts=729->851 faces=1326 has_uv=True
+[21:24:04]   上传 MachineGun: verts=215->271 faces=270 has_uv=True
+[21:24:04]   上传 FrontWheels.006: verts=84->180 faces=160 has_uv=True
+[21:24:04] ready=True, 调用 redraw

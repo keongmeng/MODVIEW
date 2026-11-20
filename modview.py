@@ -5510,9 +5510,15 @@ class ModViewer(tk.Tk):
                        font=("Microsoft YaHei UI", 9)).grid(
             row=7, column=0, columnspan=2, sticky="w", pady=p(4))
 
+        align_var = tk.BooleanVar(value=True)
+        tk.Checkbutton(body, text=tr("按 0~1 UV 排布（与贴图对齐）"), variable=align_var,
+                       bg="#f0f0f0", activebackground="#f0f0f0",
+                       font=("Microsoft YaHei UI", 9)).grid(
+            row=8, column=0, columnspan=4, sticky="w", pady=p(2))
+
         hint = tk.Label(body, text=tr("背景透明；隐藏的部件不会导出"),
                         bg="#f0f0f0", fg="#777777", font=("Microsoft YaHei UI", 8))
-        hint.grid(row=8, column=0, columnspan=4, sticky="w", pady=(p(6), 0))
+        hint.grid(row=9, column=0, columnspan=4, sticky="w", pady=(p(6), 0))
 
         def do_export():
             try:
@@ -5540,7 +5546,8 @@ class ModViewer(tk.Tk):
                     tuple(line_rgba[:3]), bool(fill_var.get()),
                     fill_color=tuple(fill_rgba[:3]),
                     line_alpha=line_alpha.get() / 100.0,
-                    fill_alpha=fill_alpha.get() / 100.0)
+                    fill_alpha=fill_alpha.get() / 100.0,
+                    fit=not bool(align_var.get()))
                 self._write_png_rgba(path, arr)
             except Exception as exc:  # noqa: BLE001
                 messagebox.showerror("导出失败", str(exc), parent=win)
