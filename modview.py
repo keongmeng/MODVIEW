@@ -2560,7 +2560,7 @@ class ModViewer(tk.Tk):
         self.prefs = {"undo_max": 32, "del_mesh": False,
                       "del_locator": True, "del_aabb": False,
                       "join": False, "sep_loose": False, "lang": "zh",
-                      "import_anim": False, "ask_import_anim": True,
+                      "import_anim": False, "ask_import_anim": True, "edit_anim": False,
                       "link_uv": False, "link_angle": 30.0, "link_mode": "topo"}
         self._prefs_load()
         set_lang(self.prefs.get("lang", "zh"))
@@ -3194,6 +3194,10 @@ class ModViewer(tk.Tk):
                                        command=self._anim_toggle_play,
                                        font=("Microsoft YaHei UI", 9))
         self.anim_play_btn.pack(side="left", padx=(6, 2))
+        self.anim_del_btn = tk.Button(self.anim_bar, text=tr("删除段"), width=6,
+                                      command=self._anim_delete_clip,
+                                      font=("Microsoft YaHei UI", 9), state="disabled")
+        self.anim_del_btn.pack(side="left", padx=(0, 2))
         self.anim_scale = ttk.Scale(self.anim_bar, from_=0, to=1, orient="horizontal",
                                     command=self._anim_on_scale)
         self.anim_scale.pack(side="left", fill="x", expand=True, padx=6, pady=3)
@@ -5664,6 +5668,54 @@ class ModViewer(tk.Tk):
             return
         self._anim_show_bar()
 
+    def _sync_anim_edit_ui(self):
+        """按首选项决定「删除段」按钮能不能点。"""
+        btn = getattr(self, "anim_del_btn", None)
+        if btn is None:
+            return
+        ok = bool(self.prefs.get("edit_anim", False))
+        btn.configure(state=("normal" if ok else "disabled"),
+                      fg=("#b03030" if ok else "#9a9a9a"))
+
+    def _anim_delete_clip(self):
+        """删掉当前选中的动画段；只有首选项里勾了「允许编辑动画」才给用。"""
+        if not self.prefs.get("edit_anim", False):
+            messagebox.showinfo(
+                "删除动画段",
+                "动画当前是「只预览」模式。\n\n"
+                "要删除请先到「文件 → 首选项 → 操作权限」勾选「允许编辑动画」。")
+            return
+        clips = list(getattr(self.scene, "anim_descs", []) or [])
+        if not clips:
+            return
+        try:
+            idx = int(self.anim_clip.current())
+        except Exception:  # noqa: BLE001
+            idx = 0
+        idx = max(0, min(idx, len(clips) - 1))
+        d = clips[idx]
+        name = getattr(d, "name", "?")
+        if not messagebox.askyesno(
+                "删除动画段",
+                "确定删除动画段「{}」吗？\n\n"
+                "导出 .mod 时不会再写出这一段（保存后才影响文件，"
+                "未保存前重新打开文件即可恢复）。".format(name),
+                parent=self):
+            return
+        self._anim_stop()
+        clips.pop(idx)
+        self.scene.anim_descs = clips
+        self._anim_sel = None
+        self._anim_frame = -1
+        self._anim_local = {}
+        if clips:
+            self._anim_show_bar()
+        else:
+            self._anim_hide_bar()
+            self.set_status("动画段已全部删除（导出时不会写出动画）")
+            return
+        self.set_status("已删除动画段：{}（还剩 {} 段）".format(name, len(clips)))
+
     def _anim_show_bar(self):
         clips = list(getattr(self.scene, "anim_descs", []) or [])
         if not clips or not hasattr(self, "anim_bar"):
@@ -5679,6 +5731,7 @@ class ModViewer(tk.Tk):
             self.anim_clip.current(0)
         if not self.anim_bar.winfo_ismapped():
             self.anim_bar.pack(side="bottom", fill="x")
+        self._sync_anim_edit_ui()
         self._anim_goto(0)
         self.set_status("动画：{} 段｜第 1 帧（拖动滑块或点 ▶ 预览）".format(len(clips)))
 
@@ -9147,13 +9200,14 @@ class ModViewer(tk.Tk):
             if isinstance(d, dict):
                 for k in ("undo_max", "del_mesh", "del_locator", "del_aabb",
                           "join", "sep_loose", "lang", "import_anim",
-                          "ask_import_anim", "link_uv", "link_angle", "link_mode"):
+                          "ask_import_anim", "edit_anim", "link_uv", "link_angle", "link_mode"):
                     if k in d:
                         self.prefs[k] = d[k]
                 self.prefs["undo_max"] = int(self.prefs["undo_max"])
                 self.prefs["import_anim"] = bool(self.prefs.get("import_anim", False))
                 self.prefs["ask_import_anim"] = bool(
                     self.prefs.get("ask_import_anim", True))
+                self.prefs["edit_anim"] = bool(self.prefs.get("edit_anim", False))
                 self.prefs["link_uv"] = bool(self.prefs.get("link_uv", False))
                 self.prefs["link_angle"] = float(self.prefs.get("link_angle", 30.0))
                 self.prefs["link_mode"] = str(self.prefs.get("link_mode", "topo") or "topo")
@@ -9218,6 +9272,7 @@ class ModViewer(tk.Tk):
         v_join = tk.BooleanVar(value=bool(self.prefs.get("join", False)))
         v_sep = tk.BooleanVar(value=bool(self.prefs.get("sep_loose", False)))
         v_anim = tk.BooleanVar(value=bool(self.prefs.get("import_anim", False)))
+        v_edit = tk.BooleanVar(value=bool(self.prefs.get("edit_anim", False)))
 
         tk.Label(win, text=tr("撤销"), bg="#ececed", fg="#333333", anchor="w",
                  font=("Microsoft YaHei UI", 9, "bold")).grid(
@@ -9271,6 +9326,16 @@ class ModViewer(tk.Tk):
                        font=("Microsoft YaHei UI", 9)).grid(
             row=4 + 5, column=0, columnspan=2, sticky="w", padx=p(12), pady=(p(6), p(1)))
 
+        tk.Checkbutton(win, text=tr("允许编辑动画（可删除动画段，导出时不再写出）"),
+                       variable=v_edit,
+                       onvalue=True, offvalue=False,
+                       image=img_off, selectimage=img_on, compound="left",
+                       indicatoron=False, relief="flat",
+                       bg="#ececed", activebackground="#ececed",
+                       anchor="w", bd=0, highlightthickness=0, padx=p(2),
+                       font=("Microsoft YaHei UI", 9)).grid(
+            row=4 + 6, column=0, columnspan=2, sticky="w", padx=p(12), pady=p(1))
+
         def reset():
             undo_var.set("32")
             v_mesh.set(False)
@@ -9279,6 +9344,7 @@ class ModViewer(tk.Tk):
             v_join.set(False)
             v_sep.set(False)
             v_anim.set(False)
+            v_edit.set(False)
 
         def ok():
             try:
@@ -9296,6 +9362,7 @@ class ModViewer(tk.Tk):
             self.prefs["sep_loose"] = bool(v_sep.get())
             anim_changed = bool(v_anim.get()) != bool(self.prefs.get("import_anim", False))
             self.prefs["import_anim"] = bool(v_anim.get())
+            self.prefs["edit_anim"] = bool(v_edit.get())
             old_lang = self.prefs.get("lang", "zh")
             try:
                 self.prefs["lang"] = ("zh", "ja", "en", "ko")[lang_cb.current()]
@@ -9304,6 +9371,7 @@ class ModViewer(tk.Tk):
             self._prefs_save()
             self._prefs_trim_undo()
             win.destroy()
+            self._sync_anim_edit_ui()
             if anim_changed:
                 if hasattr(self, "anim_var"):
                     self.anim_var.set(bool(self.prefs.get("import_anim", False)))
