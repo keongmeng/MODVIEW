@@ -2322,6 +2322,217 @@ class _TableScroll(tk.Frame):
             self.hbar.grid_remove()
 
 
+
+
+def _png_write_rgba(path, arr):
+    """把 (h, w, 4) uint8 写成 PNG（只为了给色盘生成贴图，避免依赖 Pillow）。"""
+    import zlib
+    import struct
+
+    h, w = arr.shape[:2]
+    zero = bytes(1)
+    rows = b"".join(zero + np.asarray(arr[y], np.uint8).tobytes() for y in range(h))
+
+    def chunk(tag, data):
+        return (struct.pack(">I", len(data)) + tag + data
+                + struct.pack(">I", zlib.crc32(tag + data) & 0xFFFFFFFF))
+
+    sig = bytes([137, 80, 78, 71, 13, 10, 26, 10])
+    png = (sig
+           + chunk(b"IHDR", struct.pack(">IIBBBBB", w, h, 8, 6, 0, 0, 0))
+           + chunk(b"IDAT", zlib.compress(rows, 6))
+           + chunk(b"IEND", b""))
+    with open(path, "wb") as fh:
+        fh.write(png)
+
+
+class _HsvWheelPicker(tk.Toplevel):
+    """Blender 风格的色盘：色相/饱和度圆盘 + 明度条 + Hex + Alpha。"""
+
+    WHEEL = 168
+    BAR_W = 22
+
+    def __init__(self, master, title, rgba, on_ok):
+        super().__init__(master)
+        self.title(title)
+        self.configure(bg="#2b2b2b")
+        self.transient(master)
+        self.resizable(False, False)
+        self._on_ok = on_ok
+        self.h, self.s, self.v = _rgb_to_hsv(rgba[:3])
+        self.a = float(rgba[3]) if len(rgba) > 3 else 1.0
+        self._img = None
+        self._drag = None
+
+        pad = 10
+        self.canvas = tk.Canvas(self, width=self.WHEEL, height=self.WHEEL,
+                                bg="#2b2b2b", highlightthickness=0, cursor="crosshair")
+        self.canvas.grid(row=0, column=0, padx=(pad, 6), pady=(pad, 6))
+        self.bar = tk.Canvas(self, width=self.BAR_W, height=self.WHEEL,
+                             bg="#2b2b2b", highlightthickness=0, cursor="hand2")
+        self.bar.grid(row=0, column=1, padx=(0, pad), pady=(pad, 6), sticky="n")
+
+        row = tk.Frame(self, bg="#2b2b2b")
+        row.grid(row=1, column=0, columnspan=2, sticky="we", padx=pad)
+        tk.Label(row, text="Hex", bg="#2b2b2b", fg="#dddddd",
+                 font=("Microsoft YaHei UI", 9)).pack(side="left")
+        self.hex_var = tk.StringVar()
+        ent = tk.Entry(row, textvariable=self.hex_var, width=12,
+                       font=("Consolas", 10), bg="#3c3c3c", fg="#eeeeee",
+                       insertbackground="#eeeeee", relief="flat")
+        ent.pack(side="left", padx=6, ipady=2)
+        ent.bind("<Return>", lambda _e: self._from_hex())
+        self.preview = tk.Label(row, width=4, bg="#ffffff", relief="solid", bd=1)
+        self.preview.pack(side="left", padx=(6, 0))
+
+        btns = tk.Frame(self, bg="#2b2b2b")
+        btns.grid(row=2, column=0, columnspan=2, sticky="e", padx=pad, pady=(4, pad))
+        tk.Button(btns, text="确定", width=8, command=self._ok).pack(side="left", padx=4)
+        tk.Button(btns, text="取消", width=8, command=self.destroy).pack(side="left")
+
+        self.canvas.bind("<Button-1>", lambda e: self._pick_hs(e.x, e.y, True))
+        self.canvas.bind("<B1-Motion>", lambda e: self._pick_hs(e.x, e.y, True))
+        self.bar.bind("<Button-1>", lambda e: self._pick_v(e.y, True))
+        self.bar.bind("<B1-Motion>", lambda e: self._pick_v(e.y, True))
+
+        self._rebuild()
+        self.grab_set()
+
+    # ---------------- 绘制
+    def _wheel_png(self):
+        n = self.WHEEL
+        yy, xx = np.mgrid[0:n, 0:n]
+        cx = cy = (n - 1) / 2.0
+        dx = (xx - cx) / (n / 2.0)
+        dy = (yy - cy) / (n / 2.0)
+        r = np.hypot(dx, dy)
+        hue = (np.degrees(np.arctan2(-dy, dx)) + 360.0) % 360.0 / 360.0
+        sat = np.clip(r, 0.0, 1.0)
+        arr = np.zeros((n, n, 4), np.uint8)
+        hh = hue * 6.0
+        i = np.floor(hh).astype(int) % 6
+        f = hh - np.floor(hh)
+        v = self.v
+        p = v * (1 - sat)
+        q = v * (1 - sat * f)
+        t = v * (1 - sat * (1 - f))
+        r_ = np.choose(i, [v, q, p, p, t, v])
+        g_ = np.choose(i, [t, v, v, q, p, p])
+        b_ = np.choose(i, [p, p, t, v, v, q])
+        arr[:, :, 0] = np.clip(r_ * 255, 0, 255).astype(np.uint8)
+        arr[:, :, 1] = np.clip(g_ * 255, 0, 255).astype(np.uint8)
+        arr[:, :, 2] = np.clip(b_ * 255, 0, 255).astype(np.uint8)
+        arr[:, :, 3] = np.where(r <= 1.0, 255, 0).astype(np.uint8)
+        path = os.path.join(os.environ.get("TEMP", "."), "modview_uv_wheel.png")
+        _png_write_rgba(path, arr)
+        return path
+
+    def _rebuild(self):
+        self.canvas.delete("all")
+        try:
+            path = self._wheel_png()
+            self._img = tk.PhotoImage(master=self, file=path)
+            self.canvas.create_image(0, 0, image=self._img, anchor="nw")
+        except Exception:  # noqa: BLE001
+            pass
+        # 饱和度/明度指示圈
+        n = self.WHEEL
+        rad = self.s * (n / 2.0)
+        ang = math.radians(self.h * 360.0)
+        px = n / 2.0 + math.cos(ang) * rad
+        py = n / 2.0 - math.sin(ang) * rad
+        self.canvas.create_oval(px - 5, py - 5, px + 5, py + 5,
+                                outline="#ffffff", width=2)
+        self.canvas.create_oval(px - 6, py - 6, px + 6, py + 6,
+                                outline="#000000", width=1)
+
+        # 明度条
+        self.bar.delete("all")
+        for yy in range(self.WHEEL):
+            t = 1.0 - yy / float(self.WHEEL - 1)
+            r, g, b = _hsv_to_rgb(self.h, self.s, t)
+            self.bar.create_line(0, yy, self.BAR_W, yy,
+                                 fill="#%02x%02x%02x" % (int(r * 255 + 0.5),
+                                                         int(g * 255 + 0.5),
+                                                         int(b * 255 + 0.5)))
+        by = int((1.0 - self.v) * (self.WHEEL - 1))
+        self.bar.create_rectangle(0, by - 2, self.BAR_W, by + 2,
+                                  outline="#ffffff", width=2)
+
+        r, g, b = _hsv_to_rgb(self.h, self.s, self.v)
+        self.preview.configure(bg="#%02x%02x%02x" % (int(r * 255 + 0.5),
+                                                    int(g * 255 + 0.5),
+                                                    int(b * 255 + 0.5)))
+        self.hex_var.set("#%02X%02X%02X%02X" % (int(r * 255 + 0.5), int(g * 255 + 0.5),
+                                               int(b * 255 + 0.5), int(self.a * 255 + 0.5)))
+
+    # ---------------- 交互
+    def _pick_hs(self, x, y, redraw):
+        n = self.WHEEL
+        cx = cy = (n - 1) / 2.0
+        dx = x - cx
+        dy = cy - y
+        self.s = min(1.0, math.hypot(dx, dy) / (n / 2.0))
+        if abs(dx) > 1e-6 or abs(dy) > 1e-6:
+            self.h = (math.degrees(math.atan2(dy, dx)) % 360.0) / 360.0
+        if redraw:
+            self._rebuild()
+
+    def _pick_v(self, y, redraw):
+        self.v = min(1.0, max(0.0, 1.0 - y / float(self.WHEEL - 1)))
+        if redraw:
+            self._rebuild()
+
+    def _from_hex(self):
+        txt = (self.hex_var.get() or "").strip().lstrip("#")
+        try:
+            if len(txt) == 6:
+                r, g, b = (int(txt[i:i + 2], 16) / 255.0 for i in (0, 2, 4))
+                a = self.a
+            elif len(txt) == 8:
+                r, g, b, a = (int(txt[i:i + 2], 16) / 255.0 for i in (0, 2, 4, 6))
+            else:
+                return
+        except ValueError:
+            return
+        self.h, self.s, self.v = _rgb_to_hsv((r, g, b))
+        self.a = a
+        self._rebuild()
+
+    def _ok(self):
+        r, g, b = _hsv_to_rgb(self.h, self.s, self.v)
+        try:
+            self._on_ok((r, g, b, self.a))
+        except Exception:  # noqa: BLE001
+            pass
+        self.destroy()
+
+
+def _hsv_to_rgb(h, s, v):
+    h = (h % 1.0) * 6.0
+    i = int(math.floor(h)) % 6
+    f = h - math.floor(h)
+    p = v * (1 - s)
+    q = v * (1 - s * f)
+    t = v * (1 - s * (1 - f))
+    return [(v, t, p), (q, v, p), (p, v, t), (p, q, v), (t, p, v), (v, p, q)][i]
+
+
+def _rgb_to_hsv(rgb):
+    r, g, b = [max(0.0, min(1.0, float(x))) for x in rgb[:3]]
+    mx, mn = max(r, g, b), min(r, g, b)
+    d = mx - mn
+    if d < 1e-9:
+        h = 0.0
+    elif mx == r:
+        h = ((g - b) / d) % 6.0
+    elif mx == g:
+        h = (b - r) / d + 2.0
+    else:
+        h = (r - g) / d + 4.0
+    return (h / 6.0) % 1.0, (0.0 if mx == 0 else d / mx), mx
+
+
 class ModViewer(tk.Tk):
     def __init__(self):
         enable_dpi_awareness()
@@ -5244,36 +5455,56 @@ class ModViewer(tk.Tk):
                 pass
         cb.bind("<<ComboboxSelected>>", _apply_preset)
 
-        tk.Label(body, text=tr("不透明度"), bg="#f0f0f0", fg="#333333",
-                 font=("Microsoft YaHei UI", 9)).grid(row=2, column=0, sticky="w", pady=p(6))
-        op_var = tk.IntVar(value=100)
-        sc = tk.Scale(body, from_=5, to=100, orient="horizontal", variable=op_var,
-                      bg="#f0f0f0", length=p(170), showvalue=True, sliderlength=p(14),
-                      font=("Microsoft YaHei UI", 8))
-        sc.grid(row=2, column=1, columnspan=3, sticky="we")
+        line_rgba = [1.0, 1.0, 1.0, 1.0]
+        fill_rgba = [0.72, 0.74, 0.80, 1.0]
+
+        def _swatch(row, text, rgba, title):
+            tk.Label(body, text=text, bg="#f0f0f0", fg="#333333",
+                     font=("Microsoft YaHei UI", 9)).grid(row=row, column=0, sticky="w", pady=p(2))
+            btn = tk.Button(body, width=9, relief="solid", bd=1, cursor="hand2")
+            btn.grid(row=row, column=1, sticky="w")
+
+            def paint():
+                btn.configure(bg="#%02x%02x%02x" % tuple(
+                    int(max(0.0, min(1.0, c)) * 255 + 0.5) for c in rgba[:3]))
+
+            def open_picker():
+                _HsvWheelPicker(self, title, list(rgba),
+                                lambda new: (rgba.__setitem__(slice(None), list(new)), paint()))
+
+            btn.configure(command=open_picker)
+            paint()
+            return btn
+
+        _swatch(2, tr("线框颜色"), line_rgba, tr("线框颜色"))
+        tk.Label(body, text=tr("线框不透明度"), bg="#f0f0f0", fg="#333333",
+                 font=("Microsoft YaHei UI", 9)).grid(row=3, column=0, sticky="w")
+        line_alpha = tk.IntVar(value=100)
+        tk.Scale(body, from_=0, to=100, orient="horizontal", variable=line_alpha,
+                 bg="#f0f0f0", length=p(150), showvalue=True, sliderlength=p(14),
+                 font=("Microsoft YaHei UI", 8)).grid(row=3, column=1, columnspan=3, sticky="we")
+
+        _swatch(4, tr("底色填充"), fill_rgba, tr("底色填充"))
+        tk.Label(body, text=tr("填充不透明度"), bg="#f0f0f0", fg="#333333",
+                 font=("Microsoft YaHei UI", 9)).grid(row=5, column=0, sticky="w")
+        fill_alpha = tk.IntVar(value=100)
+        tk.Scale(body, from_=0, to=100, orient="horizontal", variable=fill_alpha,
+                 bg="#f0f0f0", length=p(150), showvalue=True, sliderlength=p(14),
+                 font=("Microsoft YaHei UI", 8)).grid(row=5, column=1, columnspan=3, sticky="we")
 
         tk.Label(body, text=tr("线宽 px"), bg="#f0f0f0", fg="#333333",
-                 font=("Microsoft YaHei UI", 9)).grid(row=3, column=0, sticky="w", pady=p(2))
+                 font=("Microsoft YaHei UI", 9)).grid(row=6, column=0, sticky="w", pady=p(2))
         lw_var = tk.StringVar(value="0")
         tk.Entry(body, textvariable=lw_var, width=6,
-                 font=("Microsoft YaHei UI", 9)).grid(row=3, column=1, sticky="w")
+                 font=("Microsoft YaHei UI", 9)).grid(row=6, column=1, sticky="w")
         tk.Label(body, text=tr("（0 = 按分辨率自动）"), bg="#f0f0f0", fg="#777777",
-                 font=("Microsoft YaHei UI", 8)).grid(row=3, column=2, columnspan=2, sticky="w")
-
-        tk.Label(body, text=tr("线色"), bg="#f0f0f0", fg="#333333",
-                 font=("Microsoft YaHei UI", 9)).grid(row=4, column=0, sticky="w", pady=p(2))
-        color_var = tk.StringVar(value=tr("白色"))
-        _colors = {tr("白色"): (1.0, 1.0, 1.0), tr("黑色"): (0.0, 0.0, 0.0),
-                   tr("橙色"): (1.0, 0.55, 0.1)}
-        ttk.Combobox(body, textvariable=color_var, values=list(_colors.keys()),
-                     state="readonly", width=8,
-                     font=("Microsoft YaHei UI", 9)).grid(row=4, column=1, sticky="w")
+                 font=("Microsoft YaHei UI", 8)).grid(row=6, column=2, columnspan=2, sticky="w")
 
         fill_var = tk.BooleanVar(value=True)
-        tk.Checkbutton(body, text=tr("UV 岛内浅灰填充"), variable=fill_var,
+        tk.Checkbutton(body, text=tr("UV 岛内填充"), variable=fill_var,
                        bg="#f0f0f0", activebackground="#f0f0f0",
                        font=("Microsoft YaHei UI", 9)).grid(
-            row=5, column=0, columnspan=2, sticky="w", pady=p(4))
+            row=7, column=0, columnspan=2, sticky="w", pady=p(4))
 
         hint = tk.Label(body, text=tr("背景透明；隐藏的部件不会导出"),
                         bg="#f0f0f0", fg="#777777", font=("Microsoft YaHei UI", 8))
@@ -5300,16 +5531,20 @@ class ModViewer(tk.Tk):
             if not path:
                 return
             try:
-                rgb = _colors.get(color_var.get(), (1.0, 1.0, 1.0))
-                arr = self.view.uv_layout_rgba(tw, th, op_var.get() / 100.0,
-                                               lw or None, rgb, bool(fill_var.get()))
+                arr = self.view.uv_layout_rgba(
+                    tw, th, 1.0, lw or None,
+                    tuple(line_rgba[:3]), bool(fill_var.get()),
+                    fill_color=tuple(fill_rgba[:3]),
+                    line_alpha=line_alpha.get() / 100.0,
+                    fill_alpha=fill_alpha.get() / 100.0)
                 self._write_png_rgba(path, arr)
             except Exception as exc:  # noqa: BLE001
                 messagebox.showerror("导出失败", str(exc), parent=win)
                 return
             win.destroy()
-            self.set_status("已导出 UV 布局图: {}   ({}x{}, 不透明度 {}%)".format(
-                os.path.basename(path), tw, th, op_var.get()))
+            self.set_status("已导出 UV 布局图: {}   ({}x{}, 线 {}% / 填充 {}%)".format(
+                os.path.basename(path), tw, th,
+                line_alpha.get(), fill_alpha.get()))
 
         btns = tk.Frame(win, bg="#f0f0f0")
         btns.pack(fill="x", padx=p(14), pady=(p(4), p(10)))

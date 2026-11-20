@@ -184,6 +184,69 @@ class GLMesh:
         self.data = None     # 顶点属性缓冲（pos3 + nrm3 + uv2），改位置时原地改
 
 
+
+def _uv_mask_close(mask, rounds=2):
+    """把 1~2 采样点的裂缝补上（先膨胀后腐蚀，只连不通的地方）。"""
+    m = mask.copy()
+    for _ in range(rounds):
+        m2 = m.copy()
+        m2[1:, :] |= m[:-1, :]
+        m2[:-1, :] |= m[1:, :]
+        m2[:, 1:] |= m[:, :-1]
+        m2[:, :-1] |= m[:, 1:]
+        m = m2
+    for _ in range(rounds):
+        m2 = m.copy()
+        m2[1:, :] &= m[:-1, :]
+        m2[:-1, :] &= m[1:, :]
+        m2[:, 1:] &= m[:, :-1]
+        m2[:, :-1] &= m[:, 1:]
+        m = m2
+    return m
+
+
+def _uv_compose(cov_fill, cov_line, ss, line_rgb, fill_rgb, line_a, fill_a, opacity):
+    """把两趟覆盖度（超采样分辨率）合成成目标尺寸的 RGBA。
+
+    Blender 的 UV 导出就是「实心多边形 + 1px 描边」，这里把两层分开画再合成，
+    所以线色 / 底色各自带不透明度也不会互相污染。
+    """
+    def _prep(cov, rounds):
+        if cov is None:
+            return None
+        m = _uv_mask_close(cov > 0.0, rounds)
+        return m.astype(np.float32)
+
+    def _down(cov):
+        if cov is None:
+            return None
+        h, w = cov.shape[0] // ss, cov.shape[1] // ss
+        if ss == 1:
+            return cov
+        return cov.reshape(h, ss, w, ss).mean(axis=(1, 3))
+
+    rounds = 2 if ss > 1 else 1
+    cf = _down(_prep(cov_fill, rounds))
+    cl = _down(_prep(cov_line, rounds))
+    if cf is None:
+        cf = np.zeros_like(cl)
+    h, w = cl.shape
+
+    af = np.clip(cf * float(fill_a), 0.0, 1.0)
+    al = np.clip(cl * float(line_a), 0.0, 1.0)
+    a = al + af * (1.0 - al)
+    rgb = (line_rgb.reshape(1, 1, 3) * al[:, :, None]
+           + fill_rgb.reshape(1, 1, 3) * (af * (1.0 - al))[:, :, None])
+    safe = np.maximum(a, 1e-6)
+    rgb = rgb / safe[:, :, None]
+
+    out = np.zeros((h, w, 4), np.uint8)
+    out[:, :, :3] = np.clip(rgb * 255.0 + 0.5, 0, 255).astype(np.uint8)
+    out[:, :, 3] = np.clip(a * max(0.0, float(opacity)) * 255.0 + 0.5, 0, 255).astype(np.uint8)
+    out[out[:, :, 3] == 0] = 0
+    return out
+
+
 class GLViewport(tk.Frame):
     """用 OpenGL 渲染的 3D 视口，接口和原来的 Viewport3D 保持兼容。"""
 
@@ -2377,9 +2440,18 @@ class GLViewport(tk.Frame):
         GL.glPopMatrix()
 
     # ---------------------------------------------------------------- 导出 UV 布局
-    def uv_layout_rgba(self, out_w, out_h, opacity=1.0, line_px=None,
-                       color=(1.0, 1.0, 1.0), fill=True):
-        """离屏渲染 UV 线框到 RGBA 缓冲区（背景全透明）。返回 (h, w, 4) uint8。"""
+    def uv_layout_rgba(self, out_w, out_h, opacity=1.0, line_px=None, color=(1.0, 1.0, 1.0),
+                       fill=True, fill_color=(0.72, 0.74, 0.80),
+                       line_alpha=1.0, fill_alpha=1.0):
+        """离屏渲染 UV 线框 + 岛内填充到 RGBA 缓冲区（背景全透明）。
+
+        分两趟画成「覆盖度遮罩」（线一趟、填充一趟，都是不透明白），
+        再在 numpy 里按各自的颜色 / 不透明度合成 —— 这样：
+          · 相邻三角形的公共边不会重复混合出深浅缝
+          · 线和底色可以分别设颜色和不透明度
+          · 2x 超采样 + 补裂缝，岛内不会留 1 像素空点
+        返回 (h, w, 4) uint8。
+        """
         if not self.ready:
             try:
                 self.redraw(force=True)      # 首次还没画过：先催一次初始化
@@ -2389,16 +2461,19 @@ class GLViewport(tk.Frame):
             raise RuntimeError("OpenGL 未就绪")
         out_w = max(16, int(out_w))
         out_h = max(16, int(out_h))
+        ss = 2 if max(out_w, out_h) * 2 <= 8192 else 1
+        rw, rh = out_w * ss, out_h * ss
         meshes = self.uv_visible_meshes()
         if not meshes:
             raise RuntimeError("没有可导出的 UV（都隐藏了或模型没有 UV）")
+
         opengl32.wglMakeCurrent(ctypes.c_void_p(self.hdc), ctypes.c_void_p(self.glrc))
         GL.glBindBuffer(GL.GL_ARRAY_BUFFER, 0)
         vp_old = GL.glGetIntegerv(GL.GL_VIEWPORT)
         fbo_old = GL.glGetIntegerv(GL.GL_FRAMEBUFFER_BINDING)
         tex = GL.glGenTextures(1)
         GL.glBindTexture(GL.GL_TEXTURE_2D, tex)
-        GL.glTexImage2D(GL.GL_TEXTURE_2D, 0, GL.GL_RGBA8, out_w, out_h, 0,
+        GL.glTexImage2D(GL.GL_TEXTURE_2D, 0, GL.GL_RGBA8, rw, rh, 0,
                         GL.GL_RGBA, GL.GL_UNSIGNED_BYTE, None)
         GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_LINEAR)
         GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_LINEAR)
@@ -2413,84 +2488,92 @@ class GLViewport(tk.Frame):
             GL.glDeleteTextures([tex])
             raise RuntimeError("无法创建离屏缓冲（FBO 状态 0x%X）" % status)
 
-        try:
-            GL.glViewport(0, 0, out_w, out_h)
+        # 自适应铺满：留 4% 边距（两趟共用同一套矩阵）
+        lo = np.array([1e18, 1e18])
+        hi = np.array([-1e18, -1e18])
+        for _n, uv in meshes:
+            a = np.asarray(uv, float).reshape(-1, 2)
+            if not len(a):
+                continue
+            lo = np.minimum(lo, a.min(axis=0))
+            hi = np.maximum(hi, a.max(axis=0))
+        span = np.maximum(hi - lo, 1e-6)
+        pad = 0.04
+        side = min(rw, rh) * (1.0 - 2 * pad)
+        scale = side / float(max(span[0], span[1]))
+        cx, cy = (lo + hi) * 0.5
+        mx, my = rw * 0.5, rh * 0.5
+        lw = float(line_px) if line_px else max(1.0, min(rw, rh) / 1024.0 * 1.6)
+
+        def _screen(uv):
+            a = np.asarray(uv, float).reshape(-1, 3, 2)
+            xs = mx + (a[..., 0] - cx) * scale
+            ys = my + (a[..., 1] - cy) * scale
+            return np.stack([xs, ys], axis=-1)
+
+        def _run_pass(mode):
+            """把覆盖度画成不透明白，返回 rw*rh 的 float 覆盖度。"""
+            GL.glViewport(0, 0, rw, rh)
             GL.glClearColor(0.0, 0.0, 0.0, 0.0)
             GL.glClear(GL.GL_COLOR_BUFFER_BIT)
-            GL.glMatrixMode(GL.GL_PROJECTION)
-            GL.glPushMatrix()
-            GL.glLoadIdentity()
-            GL.glOrtho(0, out_w, 0, out_h, -1, 1)
-            GL.glMatrixMode(GL.GL_MODELVIEW)
-            GL.glPushMatrix()
-            GL.glLoadIdentity()
             GL.glDisable(GL.GL_DEPTH_TEST)
             GL.glDisable(GL.GL_TEXTURE_2D)
             GL.glDisable(GL.GL_LIGHTING)
-            GL.glEnable(GL.GL_BLEND)
-            GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
-
-            # 自适应铺满：留 4% 边距
-            lo = np.array([1e18, 1e18])
-            hi = np.array([-1e18, -1e18])
+            GL.glDisable(GL.GL_BLEND)
+            GL.glColor4f(1.0, 1.0, 1.0, 1.0)
+            if mode == "fill":
+                GL.glEnable(GL.GL_POLYGON_OFFSET_FILL)
+                GL.glPolygonOffset(1.0, 1.0)
             for _n, uv in meshes:
-                a = np.asarray(uv, float).reshape(-1, 2)
-                if not len(a):
+                tri2 = _screen(uv)
+                if not len(tri2):
                     continue
-                lo = np.minimum(lo, a.min(axis=0))
-                hi = np.maximum(hi, a.max(axis=0))
-            span = np.maximum(hi - lo, 1e-6)
-            pad = 0.04
-            side = min(out_w, out_h) * (1.0 - 2 * pad)
-            scale = side / float(max(span[0], span[1]))
-            cx, cy = (lo + hi) * 0.5
-            mx, my = out_w * 0.5, out_h * 0.5
-            lw = float(line_px) if line_px else max(1.0, min(out_w, out_h) / 1024.0 * 1.6)
-
-            alpha = max(0.0, min(1.0, float(opacity)))
-            if fill:
-                # 岛内浅灰底：让每个 UV 岛成块可辨（比线淡很多，不抢线）
-                GL.glColor4f(0.72, 0.74, 0.80, max(0.0, min(1.0, alpha * 0.55)))
-                for _n, uv in meshes:
-                    a = np.asarray(uv, float).reshape(-1, 3, 2)
-                    if not len(a):
-                        continue
-                    xs = mx + (a[..., 0] - cx) * scale
-                    ys = my + (a[..., 1] - cy) * scale
-                    tri = np.stack([xs, ys], axis=-1).reshape(-1, 2).astype(np.float32)
+                if mode == "fill":
+                    flat = tri2.reshape(-1, 2).astype(np.float32)
                     GL.glEnableClientState(GL.GL_VERTEX_ARRAY)
                     GL.glVertexPointer(2, GL.GL_FLOAT, 0,
-                                       tri.ctypes.data_as(ctypes.POINTER(ctypes.c_float)))
-                    GL.glDrawArrays(GL.GL_TRIANGLES, 0, len(tri))
+                                       flat.ctypes.data_as(ctypes.POINTER(ctypes.c_float)))
+                    GL.glDrawArrays(GL.GL_TRIANGLES, 0, len(flat))
                     GL.glDisableClientState(GL.GL_VERTEX_ARRAY)
-            GL.glColor4f(float(color[0]), float(color[1]), float(color[2]), alpha)
-            GL.glLineWidth(lw)
-            for _n, uv in meshes:
-                a = np.asarray(uv, float).reshape(-1, 3, 2)
-                if not len(a):
-                    continue
-                xs = mx + (a[..., 0] - cx) * scale
-                ys = my + (a[..., 1] - cy) * scale
-                tri = np.stack([xs, ys], axis=-1).reshape(-1, 2)
-                seg = np.empty((len(tri) * 2, 2), np.float32)
-                seg[0::2] = tri
-                seg[1::2] = np.roll(tri.reshape(-1, 3, 2), -1, axis=1).reshape(-1, 2)
-                # 用 GL_LINES 一次性提交：每三角形 3 条边
-                GL.glEnableClientState(GL.GL_VERTEX_ARRAY)
-                GL.glVertexPointer(2, GL.GL_FLOAT, 0,
-                                   seg.ctypes.data_as(ctypes.POINTER(ctypes.c_float)))
-                GL.glDrawArrays(GL.GL_LINES, 0, len(seg))
-                GL.glDisableClientState(GL.GL_VERTEX_ARRAY)
+                else:
+                    tri = tri2.reshape(-1, 3, 2)
+                    m = tri.shape[0]
+                    seg = np.empty((m * 6, 2), np.float32)
+                    seg[0::2] = tri.reshape(-1, 2)
+                    seg[1::2] = np.roll(tri, -1, axis=1).reshape(-1, 2)
+                    GL.glLineWidth(lw)
+                    GL.glEnableClientState(GL.GL_VERTEX_ARRAY)
+                    GL.glVertexPointer(2, GL.GL_FLOAT, 0,
+                                       seg.ctypes.data_as(ctypes.POINTER(ctypes.c_float)))
+                    GL.glDrawArrays(GL.GL_LINES, 0, len(seg))
+                    GL.glDisableClientState(GL.GL_VERTEX_ARRAY)
+                    GL.glLineWidth(1.0)
+            if mode == "fill":
+                GL.glDisable(GL.GL_POLYGON_OFFSET_FILL)
+            GL.glFinish()
+            buf = GL.glReadPixels(0, 0, rw, rh, GL.GL_RGBA, GL.GL_UNSIGNED_BYTE)
+            a = np.frombuffer(buf, np.uint8).reshape(rh, rw, 4)[::-1]
+            return a[:, :, 3].astype(np.float32) / 255.0
 
-            GL.glLineWidth(1.0)
-            GL.glDisable(GL.GL_BLEND)
+        try:
+            GL.glMatrixMode(GL.GL_PROJECTION)
+            GL.glPushMatrix()
+            GL.glLoadIdentity()
+            GL.glOrtho(0, rw, 0, rh, -1, 1)
+            GL.glMatrixMode(GL.GL_MODELVIEW)
+            GL.glPushMatrix()
+            GL.glLoadIdentity()
+
+            cov_fill = _run_pass("fill") if fill else None
+            cov_line = _run_pass("lines")
+
             GL.glMatrixMode(GL.GL_PROJECTION)
             GL.glPopMatrix()
             GL.glMatrixMode(GL.GL_MODELVIEW)
             GL.glPopMatrix()
-            GL.glFinish()
-            buf = GL.glReadPixels(0, 0, out_w, out_h, GL.GL_RGBA, GL.GL_UNSIGNED_BYTE)
-            arr = np.frombuffer(buf, np.uint8).reshape(out_h, out_w, 4)[::-1].copy()
+            arr = _uv_compose(cov_fill, cov_line, ss,
+                              np.asarray(color, float), np.asarray(fill_color, float),
+                              float(line_alpha), float(fill_alpha), float(opacity))
         finally:
             GL.glBindFramebuffer(GL.GL_FRAMEBUFFER, fbo_old)
             GL.glDeleteFramebuffers(1, [fbo])
@@ -2502,7 +2585,6 @@ class GLViewport(tk.Frame):
             self._last_sig = None
             self.redraw(force=True)
         return arr
-
     # ---------------------------------------------------------------- 纹理
     def _upload_texture(self):
         if not self.ready:

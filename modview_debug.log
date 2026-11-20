@@ -1,0 +1,205 @@
+[20:40:26] ==================================================
+[20:40:26] GLViewport 创建, pid=60840
+[20:40:26] 日志文件: F:\WorkBuddy\2026-11-10-23-52-40\modview-v169\modview_debug.log
+[20:40:27] redraw: 跳过（GL 未就绪）
+[20:40:27] --- _init_gl 开始 ---
+[20:40:27] winfo: 420x320  hwnd=30611298
+[20:40:27] hdc=419517432
+[20:40:27] STENCIL_BITS = 8
+[20:40:27] GL_VERSION  = b'4.6.0 NVIDIA 621.14'
+[20:40:27] GL_RENDERER = b'NVIDIA GeForce RTX 2080 Ti/PCIe/SSE2'
+[20:40:27] glGetError  = 0
+[20:40:27] 窗口过程已接管，old=140705639808320
+[20:40:27] ready=True, 调用 redraw
+[20:40:27] 开始上传 26 个网格
+[20:40:27]   上传 Tracks: verts=8->8 faces=12 has_uv=True
+[20:40:27]   上传 MajorPain_Copyright2013: verts=94->94 faces=106 has_uv=True
+[20:40:27]   上传 TRX_W: verts=1850->3206 faces=3224 has_uv=True
+[20:40:27]   上传 Hull: verts=2980->4695 faces=5218 has_uv=True
+[20:40:27]   上传 Hull_MG: verts=44->44 faces=60 has_uv=True
+[20:40:27]   上传 Turret: verts=2116->2498 faces=3754 has_uv=True
+[20:40:27]   上传 Turret_02: verts=38->38 faces=72 has_uv=True
+[20:40:27]   上传 GunCarriage_02: verts=38->38 faces=72 has_uv=True
+[20:40:27]   上传 GunCarriage_01: verts=339->383 faces=598 has_uv=True
+[20:40:27]   上传 MG_02: verts=117->131 faces=218 has_uv=True
+[20:40:27]   上传 MainBarrel: verts=190->266 faces=348 has_uv=True
+[20:40:27]   上传 FrontWheels.013: verts=256->540 faces=416 has_uv=True
+[20:40:27]   上传 FrontWheels.001: verts=164->266 faces=280 has_uv=True
+[20:40:27]   上传 FrontWheels.002: verts=366->644 faces=620 has_uv=True
+[20:40:27]   上传 FrontWheels.003: verts=366->644 faces=620 has_uv=True
+[20:40:27]   上传 FrontWheels.004: verts=304->494 faces=480 has_uv=True
+[20:40:27]   上传 FrontWheels.005: verts=366->644 faces=620 has_uv=True
+[20:40:27]   上传 FrontWheels.006: verts=366->644 faces=620 has_uv=True
+[20:40:27]   上传 FrontWheels.007: verts=164->266 faces=280 has_uv=True
+[20:40:27]   上传 FrontWheels.008: verts=304->494 faces=480 has_uv=True
+[20:40:27]   上传 FrontWheels.009: verts=366->644 faces=620 has_uv=True
+[20:40:27]   上传 FrontWheels.010: verts=366->644 faces=620 has_uv=True
+[20:40:27]   上传 FrontWheels.011: verts=164->266 faces=280 has_uv=True
+[20:40:27]   上传 FrontWheels.012: verts=366->644 faces=620 has_uv=True
+[20:40:27]   上传 Turret_03: verts=112->112 faces=192 has_uv=True
+[20:40:27]   上传 TRT_M50: verts=607->703 faces=1086 has_uv=True
+[20:41:25] ==================================================
+[20:41:25] GLViewport 创建, pid=73548
+[20:41:25] 日志文件: F:\WorkBuddy\2026-11-10-23-52-40\modview-v169\modview_debug.log
+[20:41:26] redraw: 跳过（GL 未就绪）
+[20:41:26] redraw: 跳过（GL 未就绪）
+[20:41:36] ==================================================
+[20:41:36] GLViewport 创建, pid=63648
+[20:41:36] 日志文件: F:\WorkBuddy\2026-11-10-23-52-40\modview-v169\modview_debug.log
+[20:41:36] redraw: 跳过（GL 未就绪）
+[20:41:36] --- _init_gl 开始 ---
+[20:41:36] winfo: 420x320  hwnd=71968224
+[20:41:36] hdc=18446744072803665122
+[20:41:36] STENCIL_BITS = 8
+[20:41:36] GL_VERSION  = b'4.6.0 NVIDIA 621.14'
+[20:41:36] GL_RENDERER = b'NVIDIA GeForce RTX 2080 Ti/PCIe/SSE2'
+[20:41:36] glGetError  = 0
+[20:41:36] 窗口过程已接管，old=140705639808320
+[20:41:36] ready=True, 调用 redraw
+[20:41:36] 开始上传 26 个网格
+[20:41:36]   上传 Tracks: verts=8->8 faces=12 has_uv=True
+[20:41:36]   上传 MajorPain_Copyright2013: verts=94->94 faces=106 has_uv=True
+[20:41:36]   上传 TRX_W: verts=1850->3206 faces=3224 has_uv=True
+[20:41:36]   上传 Hull: verts=2980->4695 faces=5218 has_uv=True
+[20:41:36]   上传 Hull_MG: verts=44->44 faces=60 has_uv=True
+[20:41:36]   上传 Turret: verts=2116->2498 faces=3754 has_uv=True
+[20:41:36]   上传 Turret_02: verts=38->38 faces=72 has_uv=True
+[20:41:36]   上传 GunCarriage_02: verts=38->38 faces=72 has_uv=True
+[20:41:36]   上传 GunCarriage_01: verts=339->383 faces=598 has_uv=True
+[20:41:36]   上传 MG_02: verts=117->131 faces=218 has_uv=True
+[20:41:36]   上传 MainBarrel: verts=190->266 faces=348 has_uv=True
+[20:41:36]   上传 FrontWheels.013: verts=256->540 faces=416 has_uv=True
+[20:41:36]   上传 FrontWheels.001: verts=164->266 faces=280 has_uv=True
+[20:41:36]   上传 FrontWheels.002: verts=366->644 faces=620 has_uv=True
+[20:41:36]   上传 FrontWheels.003: verts=366->644 faces=620 has_uv=True
+[20:41:36]   上传 FrontWheels.004: verts=304->494 faces=480 has_uv=True
+[20:41:36]   上传 FrontWheels.005: verts=366->644 faces=620 has_uv=True
+[20:41:36]   上传 FrontWheels.006: verts=366->644 faces=620 has_uv=True
+[20:41:37]   上传 FrontWheels.007: verts=164->266 faces=280 has_uv=True
+[20:41:37]   上传 FrontWheels.008: verts=304->494 faces=480 has_uv=True
+[20:41:37]   上传 FrontWheels.009: verts=366->644 faces=620 has_uv=True
+[20:41:37]   上传 FrontWheels.010: verts=366->644 faces=620 has_uv=True
+[20:41:37]   上传 FrontWheels.011: verts=164->266 faces=280 has_uv=True
+[20:41:37]   上传 FrontWheels.012: verts=366->644 faces=620 has_uv=True
+[20:41:37]   上传 Turret_03: verts=112->112 faces=192 has_uv=True
+[20:41:37]   上传 TRT_M50: verts=607->703 faces=1086 has_uv=True
+[20:41:54] ==================================================
+[20:41:54] GLViewport 创建, pid=42340
+[20:41:54] 日志文件: F:\WorkBuddy\2026-11-10-23-52-40\modview-v169\modview_debug.log
+[20:41:54] redraw: 跳过（GL 未就绪）
+[20:41:54] --- _init_gl 开始 ---
+[20:41:54] winfo: 420x320  hwnd=28648726
+[20:41:54] hdc=419517432
+[20:41:54] STENCIL_BITS = 8
+[20:41:54] GL_VERSION  = b'4.6.0 NVIDIA 621.14'
+[20:41:54] GL_RENDERER = b'NVIDIA GeForce RTX 2080 Ti/PCIe/SSE2'
+[20:41:54] glGetError  = 0
+[20:41:54] 窗口过程已接管，old=140705639808320
+[20:41:54] ready=True, 调用 redraw
+[20:41:54] 开始上传 26 个网格
+[20:41:54]   上传 Tracks: verts=8->8 faces=12 has_uv=True
+[20:41:54]   上传 MajorPain_Copyright2013: verts=94->94 faces=106 has_uv=True
+[20:41:54]   上传 TRX_W: verts=1850->3206 faces=3224 has_uv=True
+[20:41:54]   上传 Hull: verts=2980->4695 faces=5218 has_uv=True
+[20:41:54]   上传 Hull_MG: verts=44->44 faces=60 has_uv=True
+[20:41:54]   上传 Turret: verts=2116->2498 faces=3754 has_uv=True
+[20:41:54]   上传 Turret_02: verts=38->38 faces=72 has_uv=True
+[20:41:54]   上传 GunCarriage_02: verts=38->38 faces=72 has_uv=True
+[20:41:54]   上传 GunCarriage_01: verts=339->383 faces=598 has_uv=True
+[20:41:54]   上传 MG_02: verts=117->131 faces=218 has_uv=True
+[20:41:54]   上传 MainBarrel: verts=190->266 faces=348 has_uv=True
+[20:41:54]   上传 FrontWheels.013: verts=256->540 faces=416 has_uv=True
+[20:41:54]   上传 FrontWheels.001: verts=164->266 faces=280 has_uv=True
+[20:41:54]   上传 FrontWheels.002: verts=366->644 faces=620 has_uv=True
+[20:41:54]   上传 FrontWheels.003: verts=366->644 faces=620 has_uv=True
+[20:41:54]   上传 FrontWheels.004: verts=304->494 faces=480 has_uv=True
+[20:41:54]   上传 FrontWheels.005: verts=366->644 faces=620 has_uv=True
+[20:41:54]   上传 FrontWheels.006: verts=366->644 faces=620 has_uv=True
+[20:41:54]   上传 FrontWheels.007: verts=164->266 faces=280 has_uv=True
+[20:41:54]   上传 FrontWheels.008: verts=304->494 faces=480 has_uv=True
+[20:41:54]   上传 FrontWheels.009: verts=366->644 faces=620 has_uv=True
+[20:41:54]   上传 FrontWheels.010: verts=366->644 faces=620 has_uv=True
+[20:41:54]   上传 FrontWheels.011: verts=164->266 faces=280 has_uv=True
+[20:41:54]   上传 FrontWheels.012: verts=366->644 faces=620 has_uv=True
+[20:41:54]   上传 Turret_03: verts=112->112 faces=192 has_uv=True
+[20:41:54]   上传 TRT_M50: verts=607->703 faces=1086 has_uv=True
+[20:51:44] ==================================================
+[20:51:44] GLViewport 创建, pid=28608
+[20:51:44] 日志文件: F:\WorkBuddy\2026-11-10-23-52-40\modview-v169\modview_debug.log
+[20:51:44] redraw: 跳过（GL 未就绪）
+[20:51:44] --- _init_gl 开始 ---
+[20:51:44] winfo: 420x320  hwnd=111941530
+[20:51:44] hdc=151077398
+[20:51:45] STENCIL_BITS = 8
+[20:51:45] GL_VERSION  = b'4.6.0 NVIDIA 621.14'
+[20:51:45] GL_RENDERER = b'NVIDIA GeForce RTX 2080 Ti/PCIe/SSE2'
+[20:51:45] glGetError  = 0
+[20:51:45] 窗口过程已接管，old=140705639808320
+[20:51:45] 开始上传 26 个网格
+[20:51:45]   上传 Tracks: verts=8->8 faces=12 has_uv=True
+[20:51:45]   上传 MajorPain_Copyright2013: verts=94->94 faces=106 has_uv=True
+[20:51:45]   上传 TRX_W: verts=1850->3206 faces=3224 has_uv=True
+[20:51:45]   上传 Hull: verts=2980->4695 faces=5218 has_uv=True
+[20:51:45]   上传 Hull_MG: verts=44->44 faces=60 has_uv=True
+[20:51:45]   上传 Turret: verts=2116->2498 faces=3754 has_uv=True
+[20:51:45]   上传 Turret_02: verts=38->38 faces=72 has_uv=True
+[20:51:45]   上传 GunCarriage_02: verts=38->38 faces=72 has_uv=True
+[20:51:45]   上传 GunCarriage_01: verts=339->383 faces=598 has_uv=True
+[20:51:45]   上传 MG_02: verts=117->131 faces=218 has_uv=True
+[20:51:45]   上传 MainBarrel: verts=190->266 faces=348 has_uv=True
+[20:51:45]   上传 FrontWheels.013: verts=256->540 faces=416 has_uv=True
+[20:51:45]   上传 FrontWheels.001: verts=164->266 faces=280 has_uv=True
+[20:51:45]   上传 FrontWheels.002: verts=366->644 faces=620 has_uv=True
+[20:51:45]   上传 FrontWheels.003: verts=366->644 faces=620 has_uv=True
+[20:51:45]   上传 FrontWheels.004: verts=304->494 faces=480 has_uv=True
+[20:51:45]   上传 FrontWheels.005: verts=366->644 faces=620 has_uv=True
+[20:51:45]   上传 FrontWheels.006: verts=366->644 faces=620 has_uv=True
+[20:51:45]   上传 FrontWheels.007: verts=164->266 faces=280 has_uv=True
+[20:51:45]   上传 FrontWheels.008: verts=304->494 faces=480 has_uv=True
+[20:51:45]   上传 FrontWheels.009: verts=366->644 faces=620 has_uv=True
+[20:51:45]   上传 FrontWheels.010: verts=366->644 faces=620 has_uv=True
+[20:51:45]   上传 FrontWheels.011: verts=164->266 faces=280 has_uv=True
+[20:51:45]   上传 FrontWheels.012: verts=366->644 faces=620 has_uv=True
+[20:51:45]   上传 Turret_03: verts=112->112 faces=192 has_uv=True
+[20:51:45]   上传 TRT_M50: verts=607->703 faces=1086 has_uv=True
+[20:51:45] ready=True, 调用 redraw
+[20:52:03] ==================================================
+[20:52:03] GLViewport 创建, pid=66832
+[20:52:03] 日志文件: F:\WorkBuddy\2026-11-10-23-52-40\modview-v169\modview_debug.log
+[20:52:03] redraw: 跳过（GL 未就绪）
+[20:52:04] --- _init_gl 开始 ---
+[20:52:04] winfo: 420x320  hwnd=193537324
+[20:52:04] hdc=18446744072015134683
+[20:52:04] STENCIL_BITS = 8
+[20:52:04] GL_VERSION  = b'4.6.0 NVIDIA 621.14'
+[20:52:04] GL_RENDERER = b'NVIDIA GeForce RTX 2080 Ti/PCIe/SSE2'
+[20:52:04] glGetError  = 0
+[20:52:04] 窗口过程已接管，old=140705639808320
+[20:52:04] 开始上传 26 个网格
+[20:52:04]   上传 Tracks: verts=8->8 faces=12 has_uv=True
+[20:52:04]   上传 MajorPain_Copyright2013: verts=94->94 faces=106 has_uv=True
+[20:52:04]   上传 TRX_W: verts=1850->3206 faces=3224 has_uv=True
+[20:52:04]   上传 Hull: verts=2980->4695 faces=5218 has_uv=True
+[20:52:04]   上传 Hull_MG: verts=44->44 faces=60 has_uv=True
+[20:52:04]   上传 Turret: verts=2116->2498 faces=3754 has_uv=True
+[20:52:04]   上传 Turret_02: verts=38->38 faces=72 has_uv=True
+[20:52:04]   上传 GunCarriage_02: verts=38->38 faces=72 has_uv=True
+[20:52:04]   上传 GunCarriage_01: verts=339->383 faces=598 has_uv=True
+[20:52:04]   上传 MG_02: verts=117->131 faces=218 has_uv=True
+[20:52:04]   上传 MainBarrel: verts=190->266 faces=348 has_uv=True
+[20:52:04]   上传 FrontWheels.013: verts=256->540 faces=416 has_uv=True
+[20:52:04]   上传 FrontWheels.001: verts=164->266 faces=280 has_uv=True
+[20:52:04]   上传 FrontWheels.002: verts=366->644 faces=620 has_uv=True
+[20:52:04]   上传 FrontWheels.003: verts=366->644 faces=620 has_uv=True
+[20:52:04]   上传 FrontWheels.004: verts=304->494 faces=480 has_uv=True
+[20:52:04]   上传 FrontWheels.005: verts=366->644 faces=620 has_uv=True
+[20:52:04]   上传 FrontWheels.006: verts=366->644 faces=620 has_uv=True
+[20:52:04]   上传 FrontWheels.007: verts=164->266 faces=280 has_uv=True
+[20:52:04]   上传 FrontWheels.008: verts=304->494 faces=480 has_uv=True
+[20:52:04]   上传 FrontWheels.009: verts=366->644 faces=620 has_uv=True
+[20:52:04]   上传 FrontWheels.010: verts=366->644 faces=620 has_uv=True
+[20:52:04]   上传 FrontWheels.011: verts=164->266 faces=280 has_uv=True
+[20:52:04]   上传 FrontWheels.012: verts=366->644 faces=620 has_uv=True
+[20:52:04]   上传 Turret_03: verts=112->112 faces=192 has_uv=True
+[20:52:04]   上传 TRT_M50: verts=607->703 faces=1086 has_uv=True
+[20:52:04] ready=True, 调用 redraw
