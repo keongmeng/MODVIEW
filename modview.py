@@ -1263,7 +1263,7 @@ class Viewport3D(tk.Canvas):
 
 
 # ================================================================ 主窗口
-VERSION = "v6.13  (手柄只在移动/旋转/缩放工具下显示，选择与相连面工具不画)"
+VERSION = "v6.14  (手柄只在移动/旋转/缩放工具下显示，选择与相连面工具不画)"
 
 SPLIT_BG = "#dcdcdc"
 SPLIT_HL = "#a8c8ec"
@@ -9394,7 +9394,7 @@ class ModViewer(tk.Tk):
                     "开" if v_sep.get() else "关"))
 
         btns = tk.Frame(win, bg="#ececed")
-        btns.grid(row=4 + 6, column=0, columnspan=2, sticky="ew", padx=p(12),
+        btns.grid(row=4 + 7, column=0, columnspan=2, sticky="ew", padx=p(12),
                   pady=(p(10), p(10)))
         tk.Button(btns, text=tr("恢复默认"), command=reset).pack(side="left")
         tk.Button(btns, text=tr("取消"), command=win.destroy).pack(side="right")

@@ -514,3 +514,35 @@
 [21:38:33] glGetError  = 0
 [21:38:33] 窗口过程已接管，old=140705639808320
 [21:38:33] ready=True, 调用 redraw
+[21:47:30] ==================================================
+[21:47:30] GLViewport 创建, pid=29864
+[21:47:30] 日志文件: F:\WorkBuddy\2026-11-10-23-52-40\modview-v169\modview_debug.log
+[21:47:30] redraw: 跳过（GL 未就绪）
+[21:47:30] redraw: 跳过（GL 未就绪）
+[21:47:30] redraw: 跳过（GL 未就绪）
+[21:47:30] --- _init_gl 开始 ---
+[21:47:30] redraw: 跳过（GL 未就绪）
+[21:47:30] winfo: 1736x1120  hwnd=52170104
+[21:47:30] hdc=18446744072317119261
+[21:47:31] STENCIL_BITS = 8
+[21:47:31] GL_VERSION  = b'4.6.0 NVIDIA 621.14'
+[21:47:31] GL_RENDERER = b'NVIDIA GeForce RTX 2080 Ti/PCIe/SSE2'
+[21:47:31] glGetError  = 0
+[21:47:31] 窗口过程已接管，old=140705639808320
+[21:47:31] ready=True, 调用 redraw
+[21:47:46] ==================================================
+[21:47:46] GLViewport 创建, pid=44016
+[21:47:46] 日志文件: F:\WorkBuddy\2026-11-10-23-52-40\modview-v169\modview_debug.log
+[21:47:46] redraw: 跳过（GL 未就绪）
+[21:47:46] redraw: 跳过（GL 未就绪）
+[21:47:46] redraw: 跳过（GL 未就绪）
+[21:47:46] --- _init_gl 开始 ---
+[21:47:46] redraw: 跳过（GL 未就绪）
+[21:47:46] winfo: 1736x1120  hwnd=32050506
+[21:47:46] hdc=18446744072317119261
+[21:47:47] STENCIL_BITS = 8
+[21:47:47] GL_VERSION  = b'4.6.0 NVIDIA 621.14'
+[21:47:47] GL_RENDERER = b'NVIDIA GeForce RTX 2080 Ti/PCIe/SSE2'
+[21:47:47] glGetError  = 0
+[21:47:47] 窗口过程已接管，old=140705639808320
+[21:47:47] ready=True, 调用 redraw
