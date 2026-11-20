@@ -203,3 +203,109 @@
 [20:52:04]   上传 Turret_03: verts=112->112 faces=192 has_uv=True
 [20:52:04]   上传 TRT_M50: verts=607->703 faces=1086 has_uv=True
 [20:52:04] ready=True, 调用 redraw
+[20:59:48] ==================================================
+[20:59:48] GLViewport 创建, pid=71300
+[20:59:48] 日志文件: F:\WorkBuddy\2026-11-10-23-52-40\modview-v169\modview_debug.log
+[20:59:48] redraw: 跳过（GL 未就绪）
+[20:59:48] redraw: 跳过（GL 未就绪）
+[20:59:48] redraw: 跳过（GL 未就绪）
+[20:59:48] --- _init_gl 开始 ---
+[20:59:48] redraw: 跳过（GL 未就绪）
+[20:59:48] winfo: 1736x1120  hwnd=103748584
+[20:59:48] hdc=18446744072854001801
+[20:59:48] STENCIL_BITS = 8
+[20:59:48] GL_VERSION  = b'4.6.0 NVIDIA 621.14'
+[20:59:48] GL_RENDERER = b'NVIDIA GeForce RTX 2080 Ti/PCIe/SSE2'
+[20:59:48] glGetError  = 0
+[20:59:48] 窗口过程已接管，old=140705639808320
+[20:59:48] ready=True, 调用 redraw
+============================================================
+[2026-11-20 20:59:50] === 新会话 / 打开单位 ===
+[20:59:50] 单位: Israel-M51-SuperSherman
+[20:59:50] .mod: C:\Users\Administrator\Desktop\新建文件夹\blender 订单\9.27\临时转换\新建文件夹\IDF_M51(105)\1.mod
+[20:59:50] 版本: v6.12  (手柄只在移动/旋转/缩放工具下显示，选择与相连面工具不画)
+[20:59:50] 对象: 42 个（网格 26）
+============================================================
+[20:59:50] 开始上传 26 个网格
+[20:59:50]   上传 Tracks: verts=8->8 faces=12 has_uv=True
+[20:59:50]   上传 MajorPain_Copyright2013: verts=94->94 faces=106 has_uv=True
+[20:59:50]   上传 TRX_W: verts=1850->3206 faces=3224 has_uv=True
+[20:59:50]   上传 Hull: verts=2980->4695 faces=5218 has_uv=True
+[20:59:50]   上传 Hull_MG: verts=44->44 faces=60 has_uv=True
+[20:59:50]   上传 Turret: verts=2116->2498 faces=3754 has_uv=True
+[20:59:50]   上传 Turret_02: verts=38->38 faces=72 has_uv=True
+[20:59:50]   上传 GunCarriage_02: verts=38->38 faces=72 has_uv=True
+[20:59:50]   上传 GunCarriage_01: verts=339->383 faces=598 has_uv=True
+[20:59:50]   上传 MG_02: verts=117->131 faces=218 has_uv=True
+[20:59:50]   上传 MainBarrel: verts=190->266 faces=348 has_uv=True
+[20:59:50]   上传 FrontWheels.013: verts=256->540 faces=416 has_uv=True
+[20:59:50]   上传 FrontWheels.001: verts=164->266 faces=280 has_uv=True
+[20:59:50]   上传 FrontWheels.002: verts=366->644 faces=620 has_uv=True
+[20:59:50]   上传 FrontWheels.003: verts=366->644 faces=620 has_uv=True
+[20:59:50]   上传 FrontWheels.004: verts=304->494 faces=480 has_uv=True
+[20:59:50]   上传 FrontWheels.005: verts=366->644 faces=620 has_uv=True
+[20:59:50]   上传 FrontWheels.006: verts=366->644 faces=620 has_uv=True
+[20:59:50]   上传 FrontWheels.007: verts=164->266 faces=280 has_uv=True
+[20:59:50]   上传 FrontWheels.008: verts=304->494 faces=480 has_uv=True
+[20:59:50]   上传 FrontWheels.009: verts=366->644 faces=620 has_uv=True
+[20:59:50]   上传 FrontWheels.010: verts=366->644 faces=620 has_uv=True
+[20:59:50]   上传 FrontWheels.011: verts=164->266 faces=280 has_uv=True
+[20:59:50]   上传 FrontWheels.012: verts=366->644 faces=620 has_uv=True
+[20:59:50]   上传 Turret_03: verts=112->112 faces=192 has_uv=True
+[20:59:50]   上传 TRT_M50: verts=607->703 faces=1086 has_uv=True
+[20:59:50] 定位器 16 个，线顶点 32 三角顶点 576
+[20:59:50] 定位器 16 个，线顶点 32 三角顶点 576
+[20:59:51] 定位器 16 个，线顶点 32 三角顶点 576
+[21:00:15] ==================================================
+[21:00:15] GLViewport 创建, pid=17468
+[21:00:15] 日志文件: F:\WorkBuddy\2026-11-10-23-52-40\modview-v169\modview_debug.log
+[21:00:15] redraw: 跳过（GL 未就绪）
+[21:00:15] redraw: 跳过（GL 未就绪）
+[21:00:15] redraw: 跳过（GL 未就绪）
+[21:00:15] --- _init_gl 开始 ---
+[21:00:15] redraw: 跳过（GL 未就绪）
+[21:00:15] winfo: 1736x1120  hwnd=33428500
+[21:00:15] hdc=285300230
+[21:00:15] STENCIL_BITS = 8
+[21:00:15] GL_VERSION  = b'4.6.0 NVIDIA 621.14'
+[21:00:15] GL_RENDERER = b'NVIDIA GeForce RTX 2080 Ti/PCIe/SSE2'
+[21:00:15] glGetError  = 0
+[21:00:15] 窗口过程已接管，old=140705639808320
+[21:00:15] ready=True, 调用 redraw
+============================================================
+[2026-11-20 21:00:16] === 新会话 / 打开单位 ===
+[21:00:16] 单位: Israel-M51-SuperSherman
+[21:00:16] .mod: C:\Users\Administrator\Desktop\新建文件夹\blender 订单\9.27\临时转换\新建文件夹\IDF_M51(105)\1.mod
+[21:00:16] 版本: v6.12  (手柄只在移动/旋转/缩放工具下显示，选择与相连面工具不画)
+[21:00:16] 对象: 42 个（网格 26）
+============================================================
+[21:00:17] 开始上传 26 个网格
+[21:00:17]   上传 Tracks: verts=8->8 faces=12 has_uv=True
+[21:00:17]   上传 MajorPain_Copyright2013: verts=94->94 faces=106 has_uv=True
+[21:00:17]   上传 TRX_W: verts=1850->3206 faces=3224 has_uv=True
+[21:00:17]   上传 Hull: verts=2980->4695 faces=5218 has_uv=True
+[21:00:17]   上传 Hull_MG: verts=44->44 faces=60 has_uv=True
+[21:00:17]   上传 Turret: verts=2116->2498 faces=3754 has_uv=True
+[21:00:17]   上传 Turret_02: verts=38->38 faces=72 has_uv=True
+[21:00:17]   上传 GunCarriage_02: verts=38->38 faces=72 has_uv=True
+[21:00:17]   上传 GunCarriage_01: verts=339->383 faces=598 has_uv=True
+[21:00:17]   上传 MG_02: verts=117->131 faces=218 has_uv=True
+[21:00:17]   上传 MainBarrel: verts=190->266 faces=348 has_uv=True
+[21:00:17]   上传 FrontWheels.013: verts=256->540 faces=416 has_uv=True
+[21:00:17]   上传 FrontWheels.001: verts=164->266 faces=280 has_uv=True
+[21:00:17]   上传 FrontWheels.002: verts=366->644 faces=620 has_uv=True
+[21:00:17]   上传 FrontWheels.003: verts=366->644 faces=620 has_uv=True
+[21:00:17]   上传 FrontWheels.004: verts=304->494 faces=480 has_uv=True
+[21:00:17]   上传 FrontWheels.005: verts=366->644 faces=620 has_uv=True
+[21:00:17]   上传 FrontWheels.006: verts=366->644 faces=620 has_uv=True
+[21:00:17]   上传 FrontWheels.007: verts=164->266 faces=280 has_uv=True
+[21:00:17]   上传 FrontWheels.008: verts=304->494 faces=480 has_uv=True
+[21:00:17]   上传 FrontWheels.009: verts=366->644 faces=620 has_uv=True
+[21:00:17]   上传 FrontWheels.010: verts=366->644 faces=620 has_uv=True
+[21:00:17]   上传 FrontWheels.011: verts=164->266 faces=280 has_uv=True
+[21:00:17]   上传 FrontWheels.012: verts=366->644 faces=620 has_uv=True
+[21:00:17]   上传 Turret_03: verts=112->112 faces=192 has_uv=True
+[21:00:17]   上传 TRT_M50: verts=607->703 faces=1086 has_uv=True
+[21:00:17] 定位器 16 个，线顶点 32 三角顶点 576
+[21:00:17] 定位器 16 个，线顶点 32 三角顶点 576
+[21:00:17] 定位器 16 个，线顶点 32 三角顶点 576

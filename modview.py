@@ -5508,7 +5508,7 @@ class ModViewer(tk.Tk):
 
         hint = tk.Label(body, text=tr("背景透明；隐藏的部件不会导出"),
                         bg="#f0f0f0", fg="#777777", font=("Microsoft YaHei UI", 8))
-        hint.grid(row=6, column=0, columnspan=4, sticky="w", pady=(p(6), 0))
+        hint.grid(row=8, column=0, columnspan=4, sticky="w", pady=(p(6), 0))
 
         def do_export():
             try:
