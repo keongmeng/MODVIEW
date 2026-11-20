@@ -482,3 +482,35 @@
 [21:24:04]   上传 MachineGun: verts=215->271 faces=270 has_uv=True
 [21:24:04]   上传 FrontWheels.006: verts=84->180 faces=160 has_uv=True
 [21:24:04] ready=True, 调用 redraw
+[21:37:45] ==================================================
+[21:37:45] GLViewport 创建, pid=52164
+[21:37:45] 日志文件: F:\WorkBuddy\2026-11-10-23-52-40\modview-v169\modview_debug.log
+[21:37:45] redraw: 跳过（GL 未就绪）
+[21:37:45] redraw: 跳过（GL 未就绪）
+[21:37:45] redraw: 跳过（GL 未就绪）
+[21:37:45] --- _init_gl 开始 ---
+[21:37:45] redraw: 跳过（GL 未就绪）
+[21:37:45] winfo: 1736x1120  hwnd=7674050
+[21:37:45] hdc=18446744073256647340
+[21:37:45] STENCIL_BITS = 8
+[21:37:45] GL_VERSION  = b'4.6.0 NVIDIA 621.14'
+[21:37:45] GL_RENDERER = b'NVIDIA GeForce RTX 2080 Ti/PCIe/SSE2'
+[21:37:45] glGetError  = 0
+[21:37:45] 窗口过程已接管，old=140705639808320
+[21:37:45] ready=True, 调用 redraw
+[21:38:32] ==================================================
+[21:38:32] GLViewport 创建, pid=18060
+[21:38:32] 日志文件: F:\WorkBuddy\2026-11-10-23-52-40\modview-v169\modview_debug.log
+[21:38:32] redraw: 跳过（GL 未就绪）
+[21:38:32] redraw: 跳过（GL 未就绪）
+[21:38:32] redraw: 跳过（GL 未就绪）
+[21:38:32] --- _init_gl 开始 ---
+[21:38:32] redraw: 跳过（GL 未就绪）
+[21:38:32] winfo: 1736x1120  hwnd=285611808
+[21:38:32] hdc=18446744073256647340
+[21:38:33] STENCIL_BITS = 8
+[21:38:33] GL_VERSION  = b'4.6.0 NVIDIA 621.14'
+[21:38:33] GL_RENDERER = b'NVIDIA GeForce RTX 2080 Ti/PCIe/SSE2'
+[21:38:33] glGetError  = 0
+[21:38:33] 窗口过程已接管，old=140705639808320
+[21:38:33] ready=True, 调用 redraw
