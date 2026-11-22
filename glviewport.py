@@ -3478,32 +3478,22 @@ class GLViewport(tk.Frame):
         GL.glTexEnvi(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_MODE, GL.GL_MODULATE)
         GL.glEnable(GL.GL_BLEND)
         GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
-        GL.glEnable(GL.GL_ALPHA_TEST)
-        GL.glAlphaFunc(GL.GL_GREATER, 5.0 / 255.0)
-        GL.glEnableClientState(GL.GL_VERTEX_ARRAY)
-        GL.glEnableClientState(GL.GL_TEXTURE_COORD_ARRAY)
-        GL.glEnableClientState(GL.GL_COLOR_ARRAY)
+        GL.glDisable(GL.GL_ALPHA_TEST)
         try:
+            # 立即模式逐顶点：客户端数组在部分老驱动上会出现三角形缺角（斜切）
             for key, verts, uvs, colors in batches:
                 tid = self._fx_texture(key)
                 if not tid or not len(verts):
                     continue
                 GL.glBindTexture(GL.GL_TEXTURE_2D, tid)
-                v = np.ascontiguousarray(verts, np.float32)
-                t = np.ascontiguousarray(uvs, np.float32)
-                c = np.ascontiguousarray(colors, np.float32)
-                GL.glVertexPointer(2, GL.GL_FLOAT, 0,
-                                   v.ctypes.data_as(ctypes.POINTER(ctypes.c_float)))
-                GL.glTexCoordPointer(2, GL.GL_FLOAT, 0,
-                                     t.ctypes.data_as(ctypes.POINTER(ctypes.c_float)))
-                GL.glColorPointer(4, GL.GL_FLOAT, 0,
-                                  c.ctypes.data_as(ctypes.POINTER(ctypes.c_float)))
-                GL.glDrawArrays(GL.GL_TRIANGLES, 0, len(v))
+                GL.glBegin(GL.GL_TRIANGLES)
+                for i in range(len(verts)):
+                    GL.glColor4f(float(colors[i][0]), float(colors[i][1]),
+                                 float(colors[i][2]), float(colors[i][3]))
+                    GL.glTexCoord2f(float(uvs[i][0]), float(uvs[i][1]))
+                    GL.glVertex2f(float(verts[i][0]), float(verts[i][1]))
+                GL.glEnd()
         finally:
-            GL.glDisableClientState(GL.GL_COLOR_ARRAY)
-            GL.glDisableClientState(GL.GL_TEXTURE_COORD_ARRAY)
-            GL.glDisableClientState(GL.GL_VERTEX_ARRAY)
-            GL.glDisable(GL.GL_ALPHA_TEST)
             GL.glDepthMask(GL.GL_TRUE)
             GL.glEnable(GL.GL_DEPTH_TEST)
             GL.glDisable(GL.GL_TEXTURE_2D)

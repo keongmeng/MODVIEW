@@ -14,6 +14,7 @@ import numpy as np
 
 STEP_MS = 16.0
 SIZE_REF_HEIGHT = 600.0     # 引擎按 800x600 标定，实际屏幕按高度等比放大
+AREA_SCALE = 0.15           # GenerateArea 的散布系数（原值直接用在模型单位上偏大）
 
 
 class _Emitter(object):
@@ -154,8 +155,10 @@ class FxSystem(object):
             self._def_id[id(d)] = did
         rnd = np.random.random((m, 3))
 
-        area = d.curve("GenerateArea").sample(f) * item.scale
-        off = np.asarray(item.offset, np.float64)
+        # 引擎的 scale 只作用于尺寸；早期版本乘到这里会让粒子飞出定位器很远
+        area = d.curve("GenerateArea").sample(f) * AREA_SCALE
+        # <pos> 的数值按分米级理解：直接当米用会让粒子飞出定位器好几米
+        off = np.asarray(item.offset, np.float64) * 0.1
         local = (rnd - 0.5) * 2.0 * area
         world = em.origin + em.basis.dot(off) + local.dot(np.asarray(em.basis, float).T)
 

@@ -1271,7 +1271,7 @@ class Viewport3D(tk.Canvas):
 
 
 # ================================================================ 主窗口
-VERSION = "v6.24  (手柄只在移动/旋转/缩放工具下显示，选择与相连面工具不画)"
+VERSION = "v6.25  (手柄只在移动/旋转/缩放工具下显示，选择与相连面工具不画)"
 
 SPLIT_BG = "#dcdcdc"
 SPLIT_HL = "#a8c8ec"
@@ -5173,6 +5173,38 @@ class ModViewer(tk.Tk):
             except Exception:  # noqa: BLE001
                 pass
 
+    def _vfx_timeline_open(self, eff_name, pid):
+        """选中定位器时，把底部时间线切到「特效」模式并显示出来。"""
+        if not hasattr(self, "anim_bar"):
+            return
+        self._vfx_mode = True
+        try:
+            self.anim_play_btn.configure(text="▶")
+        except Exception:  # noqa: BLE001
+            pass
+        try:
+            self.anim_clip.configure(values=["特效：{}".format(eff_name or "无")])
+            self.anim_clip.current(0)
+        except Exception:  # noqa: BLE001
+            pass
+        try:
+            if not self.anim_bar.winfo_ismapped():
+                self.anim_bar.pack(side="bottom", fill="x")
+            self.anim_lbl.configure(text="定位器 {} · {}".format(pid, eff_name or "无特效"))
+        except Exception:  # noqa: BLE001
+            pass
+
+    def _vfx_timeline_close(self):
+        self._vfx_mode = False
+        clips = list(getattr(self.scene, "anim_descs", []) or [])
+        if clips:
+            return
+        try:
+            if hasattr(self, "anim_bar") and self.anim_bar.winfo_ismapped():
+                self.anim_bar.pack_forget()
+        except Exception:  # noqa: BLE001
+            pass
+
     def _vfx_refresh_card(self):
         name = getattr(self, "_vfx_lb_name", None)
         if name is None:
@@ -5230,13 +5262,18 @@ class ModViewer(tk.Tk):
                     pass
                 finally:
                     self._vfx_guard = False
+                self._vfx_prog_sel = set(want)
         if hasattr(self, "_vfx_lb_name"):
             self._vfx_refresh_card()
+            effs = sorted({s["effect"] for s in getattr(self, "_vfx_slots", [])
+                           if s["part_id"] == pid and s["effect"]}) if pid is not None else []
+            if effs:
+                self._vfx_timeline_open(effs[0], pid)
+            else:
+                self._vfx_timeline_close()
             if pid is not None and not getattr(self, "_xml_open", True):
-                effs = [s["effect"] for s in getattr(self, "_vfx_slots", [])
-                        if s["part_id"] == pid and s["effect"]]
                 self.set_status("右栏 特效：{}".format(
-                    "、".join(sorted(set(effs))) if effs else "该定位器未关联特效"))
+                    "、".join(effs) if effs else "该定位器未关联特效"))
 
     def _vfx_play_effect(self, effect_name, part_id=None, key_hint=None):
         if not effect_name:
@@ -5278,6 +5315,17 @@ class ModViewer(tk.Tk):
     def _vfx_play_slot(self, key=None):
         if getattr(self, "_vfx_guard", False):
             return
+        if key is None:
+            # 事件回调：如果这次选中是代码里同步过去的，就只当选中、不自动播放
+            prog = getattr(self, "_vfx_prog_sel", None)
+            if prog:
+                try:
+                    cur = set(self._vfx_tree.selection())
+                except Exception:  # noqa: BLE001
+                    cur = set()
+                if cur and cur <= prog:
+                    self._vfx_prog_sel = None
+                    return
         key = key or (self._vfx_tree.selection() or [None])[0]
         s = getattr(self, "_vfx_slot_map", {}).get(key)
         if not s:
@@ -5414,12 +5462,14 @@ class ModViewer(tk.Tk):
 
         bar = tk.Frame(parent, bg="#f0f0f0")
         bar.pack(fill="x", padx=p(6), pady=p(2))
+        # 播放/停止统一由底部时间线驱动；这里只留隐藏控件供状态同步
         self._vfx_btn_play = tk.Button(bar, text="▶", width=3, state="disabled",
                                        command=self._vfx_toggle_play,
                                        font=("Microsoft YaHei UI", 9))
-        self._vfx_btn_play.pack(side="left")
-        tk.Button(bar, text="■", width=3, command=self._vfx_stop,
-                  font=("Microsoft YaHei UI", 9)).pack(side="left", padx=(p(4), 0))
+        self._vfx_btn_stop = tk.Button(bar, text="■", width=3, command=self._vfx_stop,
+                                       font=("Microsoft YaHei UI", 9))
+        tk.Label(bar, text="▶ 用底部时间线播放", bg="#f0f0f0", fg="#666666",
+                 font=("Microsoft YaHei UI", 8)).pack(side="left", padx=(p(2), p(6)))
         self._vfx_loop = tk.BooleanVar(value=False)
         tk.Checkbutton(bar, text="循环", variable=self._vfx_loop, bg="#f0f0f0",
                        activebackground="#f0f0f0",
@@ -5457,10 +5507,7 @@ class ModViewer(tk.Tk):
         self._vfx_tree.configure(yscrollcommand=vs.set)
         self._vfx_tree.pack(side="left", fill="both", expand=True)
         vs.pack(side="right", fill="y")
-        self._vfx_tree.bind("<<TreeviewSelect>>",
-                            lambda e: self._vfx_play_slot())
-        self._vfx_tree.bind("<Double-Button-1>",
-                            lambda e: self._vfx_play_slot())
+        # 选中只做高亮；播放统一走底部时间线的 ▶（避免选中即播、来回触发）
 
         bottom = tk.Frame(parent, bg="#f0f0f0")
         bottom.pack(fill="x", padx=p(6), pady=(0, p(4)))
@@ -6580,6 +6627,9 @@ class ModViewer(tk.Tk):
             self._anim_goto(0)
 
     def _anim_toggle_play(self):
+        if getattr(self, "_vfx_mode", False):
+            self._vfx_toggle_play()
+            return
         if getattr(self, "_anim_after", None):
             self._anim_stop()
             return
@@ -6598,6 +6648,9 @@ class ModViewer(tk.Tk):
         self._anim_after = self.after(50, self._anim_tick)
 
     def _anim_stop(self):
+        if getattr(self, "_vfx_mode", False):
+            self._vfx_stop()
+            return
         aid = getattr(self, "_anim_after", None)
         if aid:
             try:
