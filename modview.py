@@ -1264,7 +1264,7 @@ class Viewport3D(tk.Canvas):
 
 
 # ================================================================ 主窗口
-VERSION = "v6.18  (手柄只在移动/旋转/缩放工具下显示，选择与相连面工具不画)"
+VERSION = "v6.19  (手柄只在移动/旋转/缩放工具下显示，选择与相连面工具不画)"
 
 SPLIT_BG = "#dcdcdc"
 SPLIT_HL = "#a8c8ec"
@@ -4921,18 +4921,27 @@ class ModViewer(tk.Tk):
                 warnings.append("第 {} 门武器（{}）没有任何平台的 FirstGun/NumGuns 覆盖到"
                                 .format(k + 1, guns[k][2] or "?"))
 
-        # 3.5) 引擎 SMechUnitRPGStats::Validate() 的断言：各平台武器区间要首尾相接
-        if plats:
-            if plats[0][2] != 0:
-                errors.append("第一个平台的 FirstGun 必须是 0（引擎断言）")
-            for k in range(1, len(plats)):
-                _i0, _mp0, fg0, ng0 = plats[k - 1]
-                _i1, _mp1, fg1, ng1 = plats[k]
-                expect = fg0 + ng0
-                if fg1 != expect:
-                    warnings.append(
-                        "平台 {} 的 FirstGun={} 与引擎断言不一致（应为 {} = 上一平台 FirstGun {} + NumGuns {}）；"
-                        "游戏里可能仍能跑，但属于非标准写法".format(k + 1, fg1, expect, fg0, ng0))
+        # 按模型归属算出「标准分配」，和当前值对比（比单看断言更好懂）
+        if any(o is not None for o in owners) and plats:
+            counts = [0] * len(plats)
+            for ow in owners:
+                if ow is not None:
+                    counts[ow] += 1
+            off = 0
+            canonical = []
+            for k in range(len(plats)):
+                canonical.append((off, counts[k]))
+                off += counts[k]
+            bad = [(k, plats[k][2], plats[k][3], canonical[k])
+                   for k in range(len(plats))
+                   if (plats[k][2], plats[k][3]) != canonical[k]]
+            if bad:
+                desc = "；".join(
+                    "平台 {} 现在是 FirstGun={} NumGuns={}，按模型归属应为 {}→{}".format(
+                        k + 1, fg, ng, c[0], c[1]) for k, fg, ng, c in bad[:3])
+                warnings.append(
+                    "驱动炮分配与模型归属不一致：" + desc +
+                    "（可在「平台」面板点『按模型重算驱动炮』一键修正）")
 
         # 4) 顺序：必须按所属平台分组，且与 <Platforms> 的顺序一致
         last = -1
@@ -8680,6 +8689,63 @@ class ModViewer(tk.Tk):
             ptab.apply()
             self.set_status("已追加一个平台，记得点「写入 XML 并保存」")
 
+        def recalc_platform_guns():
+            """按模型父子归属重算每个平台的驱动炮（FirstGun 从 0 顺序累加）。"""
+            guns = list(guns_el)
+            pmp = []
+            for it in list(plats):
+                try:
+                    pmp.append(int((it.get("ModelPart") or "-1").strip()))
+                except ValueError:
+                    pmp.append(-1)
+            parent = {}
+            for o in (self.scene.objects if self.scene else []):
+                for c in (getattr(o, "children_ids", None) or []):
+                    try:
+                        parent[int(c)] = int(o.id)
+                    except (TypeError, ValueError):
+                        pass
+
+            def owner_of(part):
+                cur, seen = part, set()
+                while cur is not None and cur not in seen:
+                    seen.add(cur)
+                    if cur in pmp:
+                        return pmp.index(cur)
+                    cur = parent.get(cur)
+                return None
+
+            counts = [0] * len(pmp)
+            unowned = 0
+            for g in guns:
+                try:
+                    mp = int((g.get("ModelPart") or "-1").strip())
+                except ValueError:
+                    mp = -1
+                ow = owner_of(mp)
+                if ow is None:
+                    unowned += 1
+                else:
+                    counts[ow] += 1
+
+            off = 0
+            for i, it in enumerate(list(plats)):
+                it.set("FirstGun", str(off))
+                it.set("NumGuns", str(counts[i]))
+                off += counts[i]
+
+            build_platform_rows()
+            ptab.measure()
+            ptab.apply()
+            self._xml_dirty = True
+            try:
+                self._refresh_xml_title()
+            except Exception:  # noqa: BLE001
+                pass
+            self.set_status("已按模型重算驱动炮：共 {} 门，分配 {}{}".format(
+                len(guns), off,
+                "（{} 门找不到归属平台）".format(unowned) if unowned else ""))
+
         # ------------------------------------------------ 武器页
         def build_gun_rows():
             gtab.reset_rows()
@@ -8845,6 +8911,8 @@ class ModViewer(tk.Tk):
         pbar = tk.Frame(tab1, bg="#ececed")
         pbar.grid(row=2, column=0, sticky="w", padx=p(8), pady=(p(6), p(4)))
         tk.Button(pbar, text=tr("+ 追加平台"), command=add_platform).pack(side="left")
+        tk.Button(pbar, text=tr("按模型重算驱动炮"),
+                  command=recalc_platform_guns).pack(side="left", padx=p(6))
         tk.Label(pbar, text=tr("  范围填角度（写回自动转弧度）；水平 = 绕 Z 扫，俯仰 = 绕 Y 抬"),
                  bg="#ececed", fg="#666666",
                  font=("Microsoft YaHei UI", 8)).pack(side="left")
