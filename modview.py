@@ -1263,7 +1263,7 @@ class Viewport3D(tk.Canvas):
 
 
 # ================================================================ 主窗口
-VERSION = "v6.14  (手柄只在移动/旋转/缩放工具下显示，选择与相连面工具不画)"
+VERSION = "v6.15  (手柄只在移动/旋转/缩放工具下显示，选择与相连面工具不画)"
 
 SPLIT_BG = "#dcdcdc"
 SPLIT_HL = "#a8c8ec"
@@ -4771,6 +4771,17 @@ class ModViewer(tk.Tk):
         if not self._xml_root or not self._xml_path:
             self.set_status("没有可保存的 xml")
             return
+        # 保存前跑一次结构检查：<Guns> 顺序错位之类的会让游戏直接闪退
+        try:
+            e2, _w2 = self._xml_check_guns(self._xml_root)
+        except Exception:  # noqa: BLE001
+            e2 = []
+        if e2:
+            msg = "发现 {} 处会导致游戏闪退的问题：\n\n{}\n\n仍要保存吗？".format(
+                len(e2), "\n".join(e2[:4]))
+            if not messagebox.askyesno("XML 检查", msg, parent=self):
+                self.set_status("已取消保存（先修 XML）")
+                return
         bak = self._xml_path + ".bak"
         try:
             if not os.path.exists(bak):
@@ -4791,6 +4802,95 @@ class ModViewer(tk.Tk):
         self._xml_dirty = False
         self._refresh_xml_title()
         self.set_status("已保存 {}".format(os.path.basename(self._xml_path)))
+
+    def _xml_check_guns(self, root):
+        """<Guns> / <Platforms> 的语义检查（顺序错位会让引擎直接闪退）。
+
+        引擎按「平台顺序 → 枪顺序」线性分配枪口归属：
+        plat 声明的 [FirstGun, FirstGun+NumGuns) 必须和模型里的父子关系对得上，
+        而且 <Guns> 里必须按平台分组排列，不能交叉。
+        """
+        errors, warnings = [], []
+        plats_el = root.find(".//Platforms")
+        guns_el = root.find(".//Guns")
+        if plats_el is None or guns_el is None:
+            return errors, warnings
+
+        plats = []
+        for i, pl in enumerate(list(plats_el)):
+            try:
+                mp = int((pl.get("ModelPart") or "-1").strip())
+                fg = int((pl.get("FirstGun") or "0").strip())
+                ng = int((pl.get("NumGuns") or "0").strip())
+            except ValueError:
+                errors.append("第 {} 个平台：ModelPart / FirstGun / NumGuns 不是整数".format(i + 1))
+                continue
+            plats.append((i, mp, fg, ng))
+
+        guns = []
+        for j, g in enumerate(list(guns_el)):
+            try:
+                mp = int((g.get("ModelPart") or "-1").strip())
+            except ValueError:
+                mp = -1
+            name = (g.findtext("Weapon") or "").strip()
+            guns.append((j, mp, name))
+        n = len(guns)
+
+        # 1) 范围
+        for i, mp, fg, ng in plats:
+            if fg < 0 or ng < 0:
+                errors.append("平台 {}（ModelPart={}）：FirstGun={} / NumGuns={} 不能是负数"
+                              .format(i + 1, mp, fg, ng))
+            elif fg + ng > n:
+                errors.append("平台 {}（ModelPart={}）的武器范围 {}..{} 超出武器总数 {}"
+                              .format(i + 1, mp, fg, fg + ng - 1, n))
+
+        # 2) 枪归哪个平台（从零件往上找，第一个匹配到的平台）
+        parent = {}
+        for o in (self.scene.objects if self.scene else []):
+            for c in (getattr(o, "children_ids", None) or []):
+                try:
+                    parent[int(c)] = int(o.id)
+                except (TypeError, ValueError):
+                    pass
+
+        def owner_of(part):
+            cur, seen = part, set()
+            while cur is not None and cur not in seen:
+                seen.add(cur)
+                for i, mp, fg, ng in plats:
+                    if mp == cur:
+                        return i
+                cur = parent.get(cur)
+            return None
+
+        owners = [owner_of(mp) for (_j, mp, _nm) in guns]
+
+        # 3) 覆盖：每门枪至少要被某个平台的范围覆盖
+        cover = [0] * n
+        for i, mp, fg, ng in plats:
+            for k in range(max(0, fg), min(fg + ng, n)):
+                cover[k] += 1
+        for k, c in enumerate(cover):
+            if c == 0:
+                warnings.append("第 {} 门武器（{}）没有任何平台的 FirstGun/NumGuns 覆盖到"
+                                .format(k + 1, guns[k][2] or "?"))
+
+        # 4) 顺序：必须按所属平台分组，且与 <Platforms> 的顺序一致
+        last = -1
+        for k, ow in enumerate(owners):
+            if ow is None:
+                continue
+            if ow < last:
+                errors.append(
+                    "第 {} 门武器（{}）属于平台 {}，却排在属于平台 {} 的武器之后 —— "
+                    "<Guns> 必须按平台分组排列，否则引擎加载时会闪退"
+                    .format(k + 1, guns[k][2] or "?", ow + 1, last + 1))
+                break
+            last = max(last, ow)
+
+        return errors, warnings
 
     def _xml_check_report(self):
         """检查磁盘上的 xml：语法（带行列）+ 常见结构问题。返回 (errors, warnings, info)。"""
@@ -4851,6 +4951,13 @@ class ModViewer(tk.Tk):
                     continue
                 if lo == lo and hi == hi and lo > hi:
                     warnings.append("平台 {}：{} > {}".format(nm, lo_a, hi_a))
+
+        try:
+            e2, w2 = self._xml_check_guns(root)
+            errors.extend(e2)
+            warnings.extend(w2)
+        except Exception:  # noqa: BLE001
+            pass
 
         return errors, warnings, "{} 行".format(n_lines)
 

@@ -546,3 +546,87 @@
 [21:47:47] glGetError  = 0
 [21:47:47] 窗口过程已接管，old=140705639808320
 [21:47:47] ready=True, 调用 redraw
+[14:11:02] ==================================================
+[14:11:02] GLViewport 创建, pid=72188
+[14:11:02] 日志文件: F:\WorkBuddy\2026-11-10-23-52-40\modview-v169\modview_debug.log
+[14:11:02] redraw: 跳过（GL 未就绪）
+[14:11:02] redraw: 跳过（GL 未就绪）
+[14:11:02] redraw: 跳过（GL 未就绪）
+[14:11:02] --- _init_gl 开始 ---
+[14:11:02] winfo: 2296x1440  hwnd=240255960
+[14:11:02] hdc=18446744073558641040
+[14:11:02] STENCIL_BITS = 8
+[14:11:02] GL_VERSION  = b'4.6.0 NVIDIA 621.14'
+[14:11:02] GL_RENDERER = b'NVIDIA GeForce RTX 2080 Ti/PCIe/SSE2'
+[14:11:02] glGetError  = 0
+[14:11:02] 窗口过程已接管，old=140705639808320
+[14:11:02] ready=True, 调用 redraw
+============================================================
+[2026-11-22 14:11:03] === 新会话 / 打开单位 ===
+[14:11:03] 单位: USSR-T80B-1982
+[14:11:03] .mod: C:\Users\Administrator\Desktop\新建文件夹\blender 订单\9.27\临时转换\新建文件夹\问题单位\USSR-T80B-1982    （空梦制作定稿 转21CCmod用）\1.mod
+[14:11:03] 版本: v6.14  (手柄只在移动/旋转/缩放工具下显示，选择与相连面工具不画)
+[14:11:03] 对象: 27 个（网格 16）
+============================================================
+[14:11:03] 开始上传 16 个网格
+[14:11:03]   上传 Tracks: verts=176->216 faces=328 has_uv=True
+[14:11:03]   上传 FrontWheels01: verts=32->64 faces=56 has_uv=True
+[14:11:03]   上传 FrontWheels02: verts=32->64 faces=56 has_uv=True
+[14:11:03]   上传 FrontWheels03: verts=96->160 faces=184 has_uv=True
+[14:11:03]   上传 FrontWheels04: verts=96->160 faces=184 has_uv=True
+[14:11:03]   上传 FrontWheels05: verts=96->160 faces=184 has_uv=True
+[14:11:03]   上传 FrontWheels06: verts=96->160 faces=184 has_uv=True
+[14:11:03]   上传 FrontWheels07: verts=96->160 faces=184 has_uv=True
+[14:11:03]   上传 FrontWheels08: verts=96->160 faces=184 has_uv=True
+[14:11:03]   上传 Basis: verts=1017->1363 faces=1783 has_uv=True
+[14:11:03]   上传 Turret: verts=386->602 faces=621 has_uv=True
+[14:11:03]   上传 GunCarriage: verts=52->52 faces=94 has_uv=True
+[14:11:03]   上传 Turret2: verts=150->158 faces=259 has_uv=True
+[14:11:03]   上传 Compl: verts=900->1052 faces=1540 has_uv=True
+[14:11:03]   上传 MainBarrel: verts=224->240 faces=428 has_uv=True
+[14:11:03]   上传 HMG: verts=672->696 faces=1201 has_uv=True
+[14:11:03] 定位器 11 个，线顶点 22 三角顶点 396
+[14:11:03] 定位器 11 个，线顶点 22 三角顶点 396
+[14:11:04] 定位器 11 个，线顶点 22 三角顶点 396
+[14:12:30] ==================================================
+[14:12:30] GLViewport 创建, pid=41028
+[14:12:30] 日志文件: F:\WorkBuddy\2026-11-10-23-52-40\modview-v169\modview_debug.log
+[14:12:30] redraw: 跳过（GL 未就绪）
+[14:12:30] redraw: 跳过（GL 未就绪）
+[14:12:30] redraw: 跳过（GL 未就绪）
+[14:12:30] --- _init_gl 开始 ---
+[14:12:30] winfo: 2296x1440  hwnd=27530172
+[14:12:30] hdc=18446744073558641040
+[14:12:30] STENCIL_BITS = 8
+[14:12:30] GL_VERSION  = b'4.6.0 NVIDIA 621.14'
+[14:12:30] GL_RENDERER = b'NVIDIA GeForce RTX 2080 Ti/PCIe/SSE2'
+[14:12:30] glGetError  = 0
+[14:12:30] 窗口过程已接管，old=140705639808320
+[14:12:30] ready=True, 调用 redraw
+============================================================
+[2026-11-22 14:12:31] === 新会话 / 打开单位 ===
+[14:12:31] 单位: USSR-T80B-1982
+[14:12:31] .mod: C:\Users\Administrator\Desktop\新建文件夹\blender 订单\9.27\临时转换\新建文件夹\问题单位\USSR-T80B-1982    （空梦制作定稿 转21CCmod用）\1.mod
+[14:12:31] 版本: v6.14  (手柄只在移动/旋转/缩放工具下显示，选择与相连面工具不画)
+[14:12:31] 对象: 27 个（网格 16）
+============================================================
+[14:12:31] 开始上传 16 个网格
+[14:12:31]   上传 Tracks: verts=176->216 faces=328 has_uv=True
+[14:12:31]   上传 FrontWheels01: verts=32->64 faces=56 has_uv=True
+[14:12:31]   上传 FrontWheels02: verts=32->64 faces=56 has_uv=True
+[14:12:31]   上传 FrontWheels03: verts=96->160 faces=184 has_uv=True
+[14:12:31]   上传 FrontWheels04: verts=96->160 faces=184 has_uv=True
+[14:12:31]   上传 FrontWheels05: verts=96->160 faces=184 has_uv=True
+[14:12:31]   上传 FrontWheels06: verts=96->160 faces=184 has_uv=True
+[14:12:31]   上传 FrontWheels07: verts=96->160 faces=184 has_uv=True
+[14:12:31]   上传 FrontWheels08: verts=96->160 faces=184 has_uv=True
+[14:12:31]   上传 Basis: verts=1017->1363 faces=1783 has_uv=True
+[14:12:31]   上传 Turret: verts=386->602 faces=621 has_uv=True
+[14:12:31]   上传 GunCarriage: verts=52->52 faces=94 has_uv=True
+[14:12:31]   上传 Turret2: verts=150->158 faces=259 has_uv=True
+[14:12:31]   上传 Compl: verts=900->1052 faces=1540 has_uv=True
+[14:12:31]   上传 MainBarrel: verts=224->240 faces=428 has_uv=True
+[14:12:31]   上传 HMG: verts=672->696 faces=1201 has_uv=True
+[14:12:31] 定位器 11 个，线顶点 22 三角顶点 396
+[14:12:31] 定位器 11 个，线顶点 22 三角顶点 396
+[14:12:32] 定位器 11 个，线顶点 22 三角顶点 396
