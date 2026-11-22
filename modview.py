@@ -1264,7 +1264,7 @@ class Viewport3D(tk.Canvas):
 
 
 # ================================================================ 主窗口
-VERSION = "v6.19  (手柄只在移动/旋转/缩放工具下显示，选择与相连面工具不画)"
+VERSION = "v6.20  (手柄只在移动/旋转/缩放工具下显示，选择与相连面工具不画)"
 
 SPLIT_BG = "#dcdcdc"
 SPLIT_HL = "#a8c8ec"
@@ -8311,41 +8311,6 @@ class ModViewer(tk.Tk):
             plats[int(mp)] = (fg, ng, dummy)
         return plats, rows
 
-    def _platform_cover_warn(self):
-        """嵌套炮塔的炮必须在每一级平台都登记。
-
-        判定：一门炮的 ModelPart 挂在某平台的下级 → 该平台和它的所有上级平台
-        的 [FirstGun, FirstGun+NumGuns) 都必须包含这门炮的序号。
-        返回 {ModelPart: "⚠ ..."}。
-        """
-        plats, _rows = self._platform_maps()
-        guns = list(getattr(self, "_gun_elems", []) or [])
-        if not plats or not guns:
-            return {}
-        par = self._part_parent_map()
-        bad = {}
-        for i, g in enumerate(guns):
-            try:
-                m = int(g.get("ModelPart", "-1"))
-            except (TypeError, ValueError):
-                continue
-            if m < 0:
-                continue
-            chain = [m] + self._part_ancestors(m, par)
-            owners = [p for p in chain if p in plats]
-            if not owners:
-                continue
-            for p in owners:
-                fg, ng, dummy = plats[p]
-                if dummy:
-                    continue
-                if not (ng > 0 and fg <= i < fg + ng):
-                    w = g.find("Weapon")
-                    name = (w.text or "").strip() if w is not None else ""
-                    bad.setdefault(p, []).append(
-                        "第{}号 {}".format(i + 1, name or "武器"))
-        return {k: "⚠ 漏登记：" + "、".join(v) for k, v in bad.items()}
-
     def _update_platform_check(self, row):
         """按当前选中的部件和已填的范围，更新"和模型对照"那一列。"""
         label = row.get("chk")
@@ -8459,17 +8424,9 @@ class ModViewer(tk.Tk):
             self._plat_gun_info = None
             self._plat_rows = []
             return
-        warns = self._platform_cover_warn()
         lines = []
         for rec in getattr(self, "_plat_rows", []) or []:
-            line = "{}：{}".format(rec["mp"].get(), self._gun_map_text(rec))
-            try:
-                w = warns.get(int(self._xml_part_id(rec["mp"].get())))
-            except Exception:  # noqa: BLE001
-                w = None
-            if w:
-                line += "    " + w
-            lines.append(line)
+            lines.append("{}：{}".format(rec["mp"].get(), self._gun_map_text(rec)))
         try:
             lbl.config(text=chr(10).join(lines))
         except tk.TclError:

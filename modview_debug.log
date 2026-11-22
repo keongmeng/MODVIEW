@@ -882,3 +882,45 @@
 [14:40:42] 定位器 11 个，线顶点 22 三角顶点 396
 [14:40:42] 定位器 11 个，线顶点 22 三角顶点 396
 [14:40:42] 定位器 11 个，线顶点 22 三角顶点 396
+[14:45:59] ==================================================
+[14:45:59] GLViewport 创建, pid=58404
+[14:45:59] 日志文件: F:\WorkBuddy\2026-11-10-23-52-40\modview-v169\modview_debug.log
+[14:45:59] redraw: 跳过（GL 未就绪）
+[14:45:59] redraw: 跳过（GL 未就绪）
+[14:45:59] redraw: 跳过（GL 未就绪）
+[14:45:59] --- _init_gl 开始 ---
+[14:45:59] winfo: 2296x1440  hwnd=84481558
+[14:45:59] hdc=18446744072065466174
+[14:45:59] STENCIL_BITS = 8
+[14:45:59] GL_VERSION  = b'4.6.0 NVIDIA 621.14'
+[14:45:59] GL_RENDERER = b'NVIDIA GeForce RTX 2080 Ti/PCIe/SSE2'
+[14:45:59] glGetError  = 0
+[14:45:59] 窗口过程已接管，old=140705639808320
+[14:45:59] ready=True, 调用 redraw
+============================================================
+[2026-11-22 14:46:00] === 新会话 / 打开单位 ===
+[14:46:00] 单位: USSR-T80B-1982
+[14:46:00] .mod: C:\Users\Administrator\Desktop\新建文件夹\blender 订单\9.27\临时转换\新建文件夹\问题单位\USSR-T80B-1982    （空梦制作定稿 转21CCmod用）\1.mod
+[14:46:00] 版本: v6.19  (手柄只在移动/旋转/缩放工具下显示，选择与相连面工具不画)
+[14:46:00] 对象: 27 个（网格 16）
+============================================================
+[14:46:00] 开始上传 16 个网格
+[14:46:00]   上传 Tracks: verts=176->216 faces=328 has_uv=True
+[14:46:00]   上传 FrontWheels01: verts=32->64 faces=56 has_uv=True
+[14:46:00]   上传 FrontWheels02: verts=32->64 faces=56 has_uv=True
+[14:46:00]   上传 FrontWheels03: verts=96->160 faces=184 has_uv=True
+[14:46:00]   上传 FrontWheels04: verts=96->160 faces=184 has_uv=True
+[14:46:00]   上传 FrontWheels05: verts=96->160 faces=184 has_uv=True
+[14:46:00]   上传 FrontWheels06: verts=96->160 faces=184 has_uv=True
+[14:46:00]   上传 FrontWheels07: verts=96->160 faces=184 has_uv=True
+[14:46:00]   上传 FrontWheels08: verts=96->160 faces=184 has_uv=True
+[14:46:00]   上传 Basis: verts=1017->1363 faces=1783 has_uv=True
+[14:46:00]   上传 Turret: verts=386->602 faces=621 has_uv=True
+[14:46:00]   上传 GunCarriage: verts=52->52 faces=94 has_uv=True
+[14:46:00]   上传 Turret2: verts=150->158 faces=259 has_uv=True
+[14:46:00]   上传 Compl: verts=900->1052 faces=1540 has_uv=True
+[14:46:00]   上传 MainBarrel: verts=224->240 faces=428 has_uv=True
+[14:46:00]   上传 HMG: verts=672->696 faces=1201 has_uv=True
+[14:46:00] 定位器 11 个，线顶点 22 三角顶点 396
+[14:46:00] 定位器 11 个，线顶点 22 三角顶点 396
+[14:46:01] 定位器 11 个，线顶点 22 三角顶点 396
