@@ -1271,7 +1271,7 @@ class Viewport3D(tk.Canvas):
 
 
 # ================================================================ 主窗口
-VERSION = "v6.27  (手柄只在移动/旋转/缩放工具下显示，选择与相连面工具不画)"
+VERSION = "v6.29  (手柄只在移动/旋转/缩放工具下显示，选择与相连面工具不画)"
 
 SPLIT_BG = "#dcdcdc"
 SPLIT_HL = "#a8c8ec"
@@ -5020,11 +5020,18 @@ class ModViewer(tk.Tk):
             cache = self._vfx_tex_cache
             if key in cache:
                 return cache[key]
-            path = self._vfx_fs.texture_path(key)
+            parts = str(key).split("|")
+            tex = parts[0]
+            dxx = int(parts[1]) if len(parts) > 2 else 1
+            dyy = int(parts[2]) if len(parts) > 2 else 1
+            path = self._vfx_fs.texture_path(tex)
             data = self._vfx_fs.read(path) if path else None
             got = _fx_ddstex.decode(data) if data else None
             if not got:
                 got = _fx_ddstex.placeholder(32)
+            else:
+                _w, _h, _arr = got
+                got = (_w, _h, _fx_ddstex.soften_cells(_arr, dxx, dyy))
             cache[key] = got
             return got
 
@@ -5263,6 +5270,10 @@ class ModViewer(tk.Tk):
                 finally:
                     self._vfx_guard = False
                 self._vfx_prog_sel = set(want)
+        old_part = getattr(self, "_vfx_play_part", None)
+        if pid != old_part and getattr(self, "_vfx_after", None) is not None:
+            self._vfx_stop()
+            self.set_status("已切换定位器，停止上一个特效")
         if hasattr(self, "_vfx_lb_name"):
             self._vfx_refresh_card()
             effs = sorted({s["effect"] for s in getattr(self, "_vfx_slots", [])
@@ -5294,6 +5305,7 @@ class ModViewer(tk.Tk):
             self.set_status("定位器 id {} 在模型里不存在".format(pid))
             return
         self._vfx_rt.stop(None)
+        self._vfx_play_part = pid
         self._vfx_handle = self._vfx_rt.play(eff, origin, basis,
                                              loop=bool(self._vfx_loop.get()))
         self._vfx_acc = 0.0
@@ -5365,6 +5377,7 @@ class ModViewer(tk.Tk):
         if getattr(self, "_vfx_rt", None) is not None:
             self._vfx_rt.stop(None)
         self._vfx_last_key = None
+        self._vfx_play_part = None
         if hasattr(self, "_vfx_btn_play"):
             self._vfx_btn_play.config(text="▶")
         try:
@@ -5403,7 +5416,8 @@ class ModViewer(tk.Tk):
             self._vfx_refresh_card()
         rt = getattr(self, "_vfx_rt", None)
         h = getattr(self, "_vfx_handle", None)
-        if rt is not None and h is not None:
+        # 只跟随「当前正在播放的那个定位器」，否则切换选中会把旧特效拽走
+        if rt is not None and h is not None and pid == getattr(self, "_vfx_play_part", None):
             origin, basis = self._vfx_anchor(pid) if pid is not None else (None, None)
             if origin is not None:
                 rt.set_anchor(h, origin, basis)
@@ -5523,6 +5537,7 @@ class ModViewer(tk.Tk):
         self._vfx_after = None
         self._vfx_acc = 0.0
         self._vfx_handle = None
+        self._vfx_play_part = None
         self._vfx_rt = None
         self._vfx_fs = None
         self._vfx_db = None

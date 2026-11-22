@@ -289,7 +289,7 @@ class FxSystem(object):
             tw = th = 0
             if tex_size is not None:
                 try:
-                    key = (d.texture or "").replace(chr(92), "/").lower()
+                    key = "%s|%d|%d" % ((d.texture or "").replace(chr(92), "/").lower(), dx, dy)
                     got = tex_size(key)
                     if got:
                         tw, th = int(got[0]), int(got[1])

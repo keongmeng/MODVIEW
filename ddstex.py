@@ -141,3 +141,25 @@ def placeholder(size=32):
     out[:, :, :3] = 255
     out[:, :, 3] = (a * 255).astype(np.uint8)
     return size, size, out
+
+
+def soften_cells(img, dx, dy, margin=0.12):
+    """给图集每格加边缘羽化，消除「画到格子边界就被切断」的硬边。
+
+    img: (h, w, 4) uint8；返回新数组（不修改入参）。
+    """
+    if img is None or dx <= 0 or dy <= 0 or (dx == 1 and dy == 1):
+        return img
+    h, w = img.shape[0], img.shape[1]
+    out = img.copy()
+    cw = w / float(dx)
+    chh = h / float(dy)
+    yy, xx = np.mgrid[0:h, 0:w].astype(np.float32)
+    fx_ = (xx % cw) / max(1.0, cw)
+    fy_ = (yy % chh) / max(1.0, chh)
+    d = np.minimum(np.minimum(fx_, 1.0 - fx_), np.minimum(fy_, 1.0 - fy_))
+    m = np.clip(d / max(1e-6, margin), 0.0, 1.0)
+    mask = (m * m * (3.0 - 2.0 * m))          # smoothstep
+    a = out[:, :, 3].astype(np.float32) * mask
+    out[:, :, 3] = np.clip(a, 0, 255).astype(np.uint8)
+    return out
