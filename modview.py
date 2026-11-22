@@ -1271,7 +1271,7 @@ class Viewport3D(tk.Canvas):
 
 
 # ================================================================ 主窗口
-VERSION = "v6.23  (手柄只在移动/旋转/缩放工具下显示，选择与相连面工具不画)"
+VERSION = "v6.24  (手柄只在移动/旋转/缩放工具下显示，选择与相连面工具不画)"
 
 SPLIT_BG = "#dcdcdc"
 SPLIT_HL = "#a8c8ec"
@@ -5210,17 +5210,26 @@ class ModViewer(tk.Tk):
         self._vfx_sel_part = pid
         tree = getattr(self, "_vfx_tree", None)
         if tree is not None:
-            self._vfx_guard = True
+            # 只在选中集合真的变化时才动 Treeview：否则 selection_add/remove
+            # 会不断触发 <<TreeviewSelect>>，和播放回调形成死循环（界面卡死）
+            want = set()
+            if pid is not None:
+                want = {s["key"] for s in getattr(self, "_vfx_slots", [])
+                        if s["part_id"] == pid}
             try:
-                tree.selection_remove(*tree.selection())
-                if pid is not None:
-                    for s in getattr(self, "_vfx_slots", []):
-                        if s["part_id"] == pid:
-                            tree.selection_add(s["key"])
+                have = set(tree.selection())
             except Exception:  # noqa: BLE001
-                pass
-            finally:
-                self._vfx_guard = False
+                have = set()
+            if want != have:
+                self._vfx_guard = True
+                try:
+                    tree.selection_remove(*have)
+                    if want:
+                        tree.selection_add(*want)
+                except Exception:  # noqa: BLE001
+                    pass
+                finally:
+                    self._vfx_guard = False
         if hasattr(self, "_vfx_lb_name"):
             self._vfx_refresh_card()
             if pid is not None and not getattr(self, "_xml_open", True):
@@ -5229,7 +5238,7 @@ class ModViewer(tk.Tk):
                 self.set_status("右栏 特效：{}".format(
                     "、".join(sorted(set(effs))) if effs else "该定位器未关联特效"))
 
-    def _vfx_play_effect(self, effect_name, part_id=None):
+    def _vfx_play_effect(self, effect_name, part_id=None, key_hint=None):
         if not effect_name:
             self.set_status("这个槽位没有特效名")
             return
@@ -5251,6 +5260,7 @@ class ModViewer(tk.Tk):
         self._vfx_handle = self._vfx_rt.play(eff, origin, basis,
                                              loop=bool(self._vfx_loop.get()))
         self._vfx_acc = 0.0
+        self._vfx_last_key = key_hint
         self._vfx_btn_play.config(text="⏸")
         if getattr(self, "_vfx_after", None) is None:
             self._vfx_after = self.after(16, self._vfx_tick)
@@ -5272,6 +5282,9 @@ class ModViewer(tk.Tk):
         s = getattr(self, "_vfx_slot_map", {}).get(key)
         if not s:
             return
+        # 同一个槽位重复触发（选中事件回环）时直接忽略
+        if key == getattr(self, "_vfx_last_key", None) and getattr(self, "_vfx_after", None) is not None:
+            return
         # 点表格行时同步选中状态，让卡片/视口高亮跟着走
         pid = s.get("part_id", -1)
         if pid is not None and pid >= 0:
@@ -5281,7 +5294,7 @@ class ModViewer(tk.Tk):
                 self.on_select()
             except Exception:  # noqa: BLE001
                 pass
-        self._vfx_play_effect(s["effect"], s["part_id"])
+        self._vfx_play_effect(s["effect"], s["part_id"], key)
 
     def _vfx_toggle_play(self):
         if getattr(self, "_vfx_after", None) is not None:
@@ -5303,6 +5316,7 @@ class ModViewer(tk.Tk):
             self._vfx_after = None
         if getattr(self, "_vfx_rt", None) is not None:
             self._vfx_rt.stop(None)
+        self._vfx_last_key = None
         if hasattr(self, "_vfx_btn_play"):
             self._vfx_btn_play.config(text="▶")
         try:
