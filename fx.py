@@ -79,9 +79,14 @@ class FxSystem(object):
         return int(self.alive.sum())
 
     def set_anchor(self, handle, origin, basis=None):
+        """更新发射点；已经飞出去的粒子也跟着平移，预览里才不会和部件脱节。"""
         for em in self._emitters:
             if handle is None or em.handle == handle:
-                em.origin = np.asarray(origin, np.float64)
+                new_o = np.asarray(origin, np.float64)
+                delta = new_o - em.origin
+                if np.any(np.abs(delta) > 1e-9) and self.alive.any():
+                    self.pos[self.alive] += delta
+                em.origin = new_o
                 if basis is not None:
                     em.basis = np.asarray(basis, np.float64)
 
