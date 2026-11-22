@@ -154,6 +154,13 @@ for _p in _cands:
 from glviewport import GLViewport
 from i18n import tr, set_lang, LANG_NAMES
 
+# 特效预览相关模块（与本文件同目录）
+import pakefs as _fx_pakefs
+import ddstex as _fx_ddstex
+import effectdb as _fx_effectdb
+import fx as _fx_runtime
+_fx_autodetect = _fx_pakefs.autodetect_roots
+
 try:
     import numpy as np
     from mod_scene import ModScene, ModSceneObject, ModSceneMeshData
@@ -1264,7 +1271,7 @@ class Viewport3D(tk.Canvas):
 
 
 # ================================================================ 主窗口
-VERSION = "v6.21  (手柄只在移动/旋转/缩放工具下显示，选择与相连面工具不画)"
+VERSION = "v6.22  (手柄只在移动/旋转/缩放工具下显示，选择与相连面工具不画)"
 
 SPLIT_BG = "#dcdcdc"
 SPLIT_HL = "#a8c8ec"
@@ -3024,6 +3031,17 @@ class ModViewer(tk.Tk):
         self.xml_panel.pack_propagate(False)
         self._xml_open = True
 
+        # 右栏改成双页签：特效（默认） / XML。xml_panel 仍是外层容器，
+        # toggle_xml_panel / _xml_split_* 全都不受影响。
+        self.right_nb = ttk.Notebook(self.xml_panel)
+        self.right_nb.pack(fill="both", expand=True)
+        self.tab_vfx = tk.Frame(self.right_nb, bg="#f0f0f0")
+        self.tab_xml = tk.Frame(self.right_nb, bg="#f0f0f0")
+        self.right_nb.add(self.tab_vfx, text="特效")
+        self.right_nb.add(self.tab_xml, text="XML")
+        self.right_nb.select(self.tab_vfx)
+        self.right_nb.bind("<<NotebookTabChanged>>", self._on_right_tab_changed)
+
         # ---- XML 面板左缘分隔条：按住拖动调整 XML / 视口占比，双击复位
         self.xml_splitter = tk.Frame(body, bg=SPLIT_BG, width=self.px(6),
                                      cursor="sb_h_double_arrow")
@@ -3035,7 +3053,7 @@ class ModViewer(tk.Tk):
         self.xml_splitter.bind("<Enter>", lambda e: self.xml_splitter.config(bg=SPLIT_HL))
         self.xml_splitter.bind("<Leave>", lambda e: self.xml_splitter.config(bg=SPLIT_BG))
 
-        xhead = tk.Frame(self.xml_panel, bg="#f0f0f0")
+        xhead = tk.Frame(self.tab_xml, bg="#f0f0f0")
         xhead.pack(fill="x", padx=6, pady=(4, 2))
         tk.Label(xhead, text="XML", anchor="w", bg="#f0f0f0", fg="black",
                  font=("Microsoft YaHei UI", 9, "bold")).pack(side="left")
@@ -3043,7 +3061,7 @@ class ModViewer(tk.Tk):
                                   font=("Microsoft YaHei UI", 8))
         self.xml_title.pack(side="right")
 
-        xsrow = tk.Frame(self.xml_panel, bg="#f0f0f0")
+        xsrow = tk.Frame(self.tab_xml, bg="#f0f0f0")
         xsrow.pack(fill="x", padx=6, pady=(0, 2))
         tk.Label(xsrow, text="搜索", bg="#f0f0f0", fg="#444444",
                  font=("Microsoft YaHei UI", 9)).pack(side="left", padx=(0, self.px(4)))
@@ -3057,7 +3075,7 @@ class ModViewer(tk.Tk):
         self.ent_xml_search.bind("<Escape>",
                                  lambda e: (self.xml_search.set(""), self.on_xml_search()))
 
-        xf = tk.Frame(self.xml_panel, bg="white", bd=1, relief="sunken")
+        xf = tk.Frame(self.tab_xml, bg="white", bd=1, relief="sunken")
         xf.pack(fill="both", expand=True, padx=6, pady=(0, 6))
         st_x = ttk.Style(self)
         st_x.configure("Xml.Treeview", background="white", fieldbackground="white",
@@ -3111,7 +3129,7 @@ class ModViewer(tk.Tk):
             pass
         self.xml_tree.bind("<<TreeviewSelect>>", self._on_xml_select)
 
-        xedit = tk.Frame(self.xml_panel, bg="#f0f0f0")
+        xedit = tk.Frame(self.tab_xml, bg="#f0f0f0")
         xedit.pack(fill="x", padx=6, pady=(0, 2))
         tk.Label(xedit, text="值", bg="#f0f0f0", fg="#333333",
                  font=("Microsoft YaHei UI", 9)).pack(side="left")
@@ -3123,7 +3141,7 @@ class ModViewer(tk.Tk):
                           ipady=self.px(1))
         self.ent_xml.bind("<Return>", lambda e: self._xml_apply())
 
-        xbar = tk.Frame(self.xml_panel, bg="#f0f0f0")
+        xbar = tk.Frame(self.tab_xml, bg="#f0f0f0")
         xbar.pack(fill="x", padx=6, pady=(0, 6))
         tk.Button(xbar, text="应用", width=5, font=("Microsoft YaHei UI", 9),
                   command=self._xml_apply).pack(side="left")
@@ -3132,6 +3150,8 @@ class ModViewer(tk.Tk):
         self.lb_xml_hint = tk.Label(xbar, text="", bg="#f0f0f0", fg="#666666",
                                     font=("Microsoft YaHei UI", 8))
         self.lb_xml_hint.pack(side="left")
+
+        self._build_vfx_page(self.tab_vfx)
 
         # 右：3D 视口（纯黑，无边框）
         self.tool = "select"
@@ -3579,6 +3599,10 @@ class ModViewer(tk.Tk):
         self._sync_pivot()
         if redraw:
             self.view._last_sig = None
+            try:
+                self._vfx_sync_anchors()
+            except Exception:  # noqa: BLE001
+                pass
             self.view.redraw(force=True)
         self.refresh_transform_panel()
 
@@ -4804,6 +4828,10 @@ class ModViewer(tk.Tk):
         self._xml_dirty = False
         self._refresh_xml_title()
         self.set_status("已保存 {}".format(os.path.basename(self._xml_path)))
+        try:
+            self._vfx_rebuild_slots()
+        except Exception:  # noqa: BLE001
+            pass
 
     def _xml_check_platforms(self, root):
         """<Platforms> 的顺序检查：父平台必须排在子平台之前。
@@ -4957,6 +4985,495 @@ class ModViewer(tk.Tk):
             last = max(last, ow)
 
         return errors, warnings
+
+    # ================================================================ 特效面板
+    def _vfx_game_dir(self):
+        roots = list(self.prefs.get("fx_data_roots") or [])
+        if roots and os.path.isdir(roots[0]):
+            return roots[0]
+        guess = _fx_autodetect(self.mod_path, roots)
+        return guess[0] if guess else ""
+
+    def _vfx_ensure(self):
+        """惰性准备 pak / 特效库 / 粒子系统。失败返回 False。"""
+        if getattr(self, "_vfx_rt", None) is not None:
+            return True
+        gdir = self._vfx_game_dir()
+        if not gdir:
+            self.set_status("未指定游戏目录：点「特效」页的「选择游戏目录…」")
+            return False
+        try:
+            fs = _fx_pakefs.PakFS()
+            fs.set_roots([gdir])
+            db = _fx_effectdb.EffectDB(fs)
+            rt = _fx_runtime.FxSystem()
+        except Exception as exc:  # noqa: BLE001
+            self.set_status("特效数据加载失败：{}".format(exc))
+            return False
+        if fs.count() == 0:
+            self.set_status("目录里没有找到 .pak：{}".format(gdir))
+            return False
+        self._vfx_fs, self._vfx_db, self._vfx_rt = fs, db, rt
+        self._vfx_tex_cache = {}
+
+        def loader(key):
+            cache = self._vfx_tex_cache
+            if key in cache:
+                return cache[key]
+            path = self._vfx_fs.texture_path(key)
+            data = self._vfx_fs.read(path) if path else None
+            got = _fx_ddstex.decode(data) if data else None
+            if not got:
+                got = _fx_ddstex.placeholder(32)
+            cache[key] = got
+            return got
+
+        try:
+            self.view.set_fx_system(rt, loader)
+        except Exception:  # noqa: BLE001
+            pass
+        return True
+
+    def _vfx_load_effects(self):
+        if not self._vfx_ensure():
+            return []
+        try:
+            return self._vfx_db.effect_names()
+        except Exception:  # noqa: BLE001
+            return []
+
+    def _vfx_reset(self):
+        try:
+            if getattr(self, "_vfx_rt", None) is not None:
+                self._vfx_rt.stop(None)
+        except Exception:  # noqa: BLE001
+            pass
+        self._vfx_slots = []
+        self._vfx_slot_map = {}
+        self._vfx_sel_part = None
+        if getattr(self, "_vfx_tree", None) is not None:
+            try:
+                for iid in self._vfx_tree.get_children(""):
+                    self._vfx_tree.delete(iid)
+            except Exception:  # noqa: BLE001
+                pass
+        self._vfx_refresh_card()
+
+    def _xml_text_of(self, tag):
+        root = getattr(self, "_xml_root", None)
+        if root is None:
+            return ""
+        el = root.find(".//" + tag)
+        if el is None:
+            return ""
+        return (el.text or "").strip()
+
+    def _vfx_rebuild_slots(self):
+        """从 _xml_root 收集所有特效槽（id ↔ 特效名）。"""
+        slots = []
+        root = getattr(self, "_xml_root", None)
+        if root is None:
+            self._vfx_slots = []
+            self._vfx_slot_map = {}
+            self._vfx_fill_tree()
+            return
+
+        def loc_name(pid):
+            for it in (self._all_locators or []):
+                if it[3] == pid:
+                    return it[0]
+            obj = self._obj_by_id_map().get(pid)
+            return obj.name if obj is not None else ""
+
+        def add(kind, label, tag, pid, editable=True, extra=""):
+            eff = self._xml_text_of(tag) if tag else ""
+            slots.append({
+                "key": "%s#%s" % (kind, pid),
+                "kind": kind, "label": label, "part_id": int(pid),
+                "loc": loc_name(pid) if pid is not None and pid >= 0 else "",
+                "tag": tag, "effect": eff, "editable": editable, "extra": extra,
+            })
+
+        rpg = root.find(".//RPG")
+        for it in root.findall(".//ExhaustPoints/item"):
+            try:
+                pid = int(it.get("data", "-1"))
+            except ValueError:
+                continue
+            add("exhaust", "排气烟", "EffectDiesel", pid)
+        for it in root.findall(".//DamagePoints/item"):
+            try:
+                pid = int(it.get("data", "-1"))
+            except ValueError:
+                continue
+            add("damage", "受损冒烟", "EffectSmoke", pid)
+        if rpg is not None:
+            for attr, label, tag in (("FatalitySmokePoint", "殉爆", "EffectFatality"),
+                                     ("ShootDustPoint", "开火扬尘", "EffectShootDust"),
+                                     ("EntrancePoint", "上车点", "")):
+                try:
+                    pid = int(rpg.get(attr, "-1"))
+                except ValueError:
+                    pid = -1
+                add({"FatalitySmokePoint": "fatality", "ShootDustPoint": "shootdust",
+                     "EntrancePoint": "entrance"}[attr], label, tag, pid)
+        for tag, label in (("EffectWheelDust", "行驶尘土"), ("EffectDisappear", "解体")):
+            slots.append({"key": "unit#%s" % tag, "kind": "unit", "label": label, "part_id": -1,
+                          "loc": "", "tag": tag, "effect": self._xml_text_of(tag),
+                          "editable": True, "extra": ""})
+
+        # 每把枪的开火特效（来自武器 XML）
+        db = getattr(self, "_vfx_db", None)
+        for gi, g in enumerate(root.findall(".//Guns/item")):
+            try:
+                pid = int(g.get("ShootPoint", "-1"))
+            except ValueError:
+                pid = -1
+            wname = (g.findtext("Weapon") or "").strip()
+            eff = ""
+            if db is not None and wname:
+                w = db.weapon(wname)
+                if w:
+                    eff = w.effects.get("EffectGunFire", "")
+            slots.append({"key": "gunfire#%d" % gi, "kind": "gunfire",
+                          "label": "炮口焰 #%d" % (gi + 1), "part_id": pid,
+                          "loc": loc_name(pid), "tag": "", "effect": eff,
+                          "editable": False, "extra": wname})
+
+        self._vfx_slots = slots
+        self._vfx_slot_map = {s["key"]: s for s in slots}
+        self._vfx_fill_tree()
+        self._vfx_refresh_card()
+
+    def _vfx_fill_tree(self):
+        tree = getattr(self, "_vfx_tree", None)
+        if tree is None:
+            return
+        try:
+            for iid in tree.get_children(""):
+                tree.delete(iid)
+        except Exception:  # noqa: BLE001
+            return
+        for s in getattr(self, "_vfx_slots", []):
+            pid = s["part_id"]
+            if pid is None or pid < 0:
+                state = "无点位"
+                loc = "未指定（-1）"
+            elif s["loc"]:
+                state = "就绪" if s["effect"] else "空"
+                loc = "%d %s" % (pid, s["loc"])
+            else:
+                state = "缺失"
+                loc = "%d（模型里没有）" % pid
+            if s["tag"] == "" and s["kind"] == "gunfire":
+                state = state if s["effect"] else "武器无特效"
+            try:
+                tree.insert("", "end", iid=s["key"],
+                            values=(s["label"], loc, s["effect"] or "—", state))
+            except Exception:  # noqa: BLE001
+                pass
+
+    def _vfx_refresh_card(self):
+        name = getattr(self, "_vfx_lb_name", None)
+        if name is None:
+            return
+        obj = None
+        pid = getattr(self, "_vfx_sel_part", None)
+        if pid is not None:
+            obj = self._obj_by_id_map().get(pid)
+        if obj is None:
+            name.config(text="未选中定位器")
+            self._vfx_lb_meta.config(text="在视口或左侧列表里点一个定位器")
+            self._vfx_lb_eff.config(text="")
+            self._vfx_btn_play.config(state="disabled")
+            self._vfx_ask.pack_forget()
+            return
+        effs = [s["effect"] for s in getattr(self, "_vfx_slots", [])
+                if s["part_id"] == pid and s["effect"]]
+        name.config(text=obj.name)
+        pos = obj.location if getattr(obj, "location", None) is not None else (0, 0, 0)
+        self._vfx_lb_meta.config(text="id {} · X {:.2f} Y {:.2f} Z {:.2f}".format(
+            pid, float(pos[0]), float(pos[1]), float(pos[2])))
+        if effs:
+            self._vfx_lb_eff.config(text="关联特效：" + "、".join(sorted(set(effs))))
+            self._vfx_ask.pack_forget()
+            self._vfx_btn_play.config(state="normal")
+        else:
+            self._vfx_lb_eff.config(text="该定位器未关联特效")
+            self._vfx_ask.pack(fill="x", padx=self.px(6), pady=(0, self.px(4)))
+            self._vfx_btn_play.config(state="disabled")
+
+    def _vfx_on_select(self, obj, pos=None):
+        pid = None
+        if obj is not None and getattr(obj, "data", None) is None:
+            pid = int(obj.id)
+        self._vfx_sel_part = pid
+        tree = getattr(self, "_vfx_tree", None)
+        if tree is not None:
+            try:
+                tree.selection_remove(*tree.selection())
+                if pid is not None:
+                    for s in getattr(self, "_vfx_slots", []):
+                        if s["part_id"] == pid:
+                            tree.selection_add(s["key"])
+            except Exception:  # noqa: BLE001
+                pass
+        if hasattr(self, "_vfx_lb_name"):
+            self._vfx_refresh_card()
+            if pid is not None and not getattr(self, "_xml_open", True):
+                effs = [s["effect"] for s in getattr(self, "_vfx_slots", [])
+                        if s["part_id"] == pid and s["effect"]]
+                self.set_status("右栏 特效：{}".format(
+                    "、".join(sorted(set(effs))) if effs else "该定位器未关联特效"))
+
+    def _vfx_play_effect(self, effect_name, part_id=None):
+        if not effect_name:
+            self.set_status("这个槽位没有特效名")
+            return
+        if not self._vfx_ensure():
+            return
+        eff = self._vfx_db.effect(effect_name)
+        if eff is None:
+            self.set_status("找不到特效定义：{}（检查游戏目录/pak）".format(effect_name))
+            return
+        pid = part_id if part_id is not None else self._vfx_sel_part
+        if pid is None or pid < 0:
+            self.set_status("该槽位没有绑定定位器，无法定位播放")
+            return
+        origin, basis = self._vfx_anchor(pid)
+        if origin is None:
+            self.set_status("定位器 id {} 在模型里不存在".format(pid))
+            return
+        self._vfx_rt.stop(None)
+        self._vfx_handle = self._vfx_rt.play(eff, origin, basis,
+                                             loop=bool(self._vfx_loop.get()))
+        self._vfx_acc = 0.0
+        self._vfx_btn_play.config(text="⏸")
+        if getattr(self, "_vfx_after", None) is None:
+            self._vfx_after = self.after(16, self._vfx_tick)
+        self.set_status("播放特效 {}（定位器 {}）".format(effect_name, pid))
+
+    def _vfx_anchor(self, pid):
+        for it in (self._all_locators or []):
+            if it[3] == pid:
+                return np.asarray(it[1], float), np.asarray(it[2], float)
+        M = self._world.get(pid) if getattr(self, "_world", None) else None
+        if M is None:
+            return None, None
+        return np.asarray(M[:3, 3], float), np.asarray(M[:3, :3], float)
+
+    def _vfx_play_slot(self, key=None):
+        key = key or (self._vfx_tree.selection() or [None])[0]
+        s = getattr(self, "_vfx_slot_map", {}).get(key)
+        if not s:
+            return
+        self._vfx_play_effect(s["effect"], s["part_id"])
+
+    def _vfx_toggle_play(self):
+        if getattr(self, "_vfx_after", None) is not None:
+            self._vfx_stop()
+            return
+        pid = getattr(self, "_vfx_sel_part", None)
+        for s in getattr(self, "_vfx_slots", []):
+            if s["part_id"] == pid and s["effect"]:
+                self._vfx_play_slot(s["key"])
+                return
+        self.set_status("当前定位器没有可播放的特效")
+
+    def _vfx_stop(self):
+        if getattr(self, "_vfx_after", None) is not None:
+            try:
+                self.after_cancel(self._vfx_after)
+            except Exception:  # noqa: BLE001
+                pass
+            self._vfx_after = None
+        if getattr(self, "_vfx_rt", None) is not None:
+            self._vfx_rt.stop(None)
+        if hasattr(self, "_vfx_btn_play"):
+            self._vfx_btn_play.config(text="▶")
+        try:
+            self.view._last_sig = None
+            self.view.redraw(force=True)
+        except Exception:  # noqa: BLE001
+            pass
+
+    def _vfx_tick(self):
+        self._vfx_after = None
+        rt = getattr(self, "_vfx_rt", None)
+        if rt is None:
+            return
+        speed = 1.0
+        try:
+            speed = float(str(self._vfx_speed.get()).rstrip("x"))
+        except Exception:  # noqa: BLE001
+            speed = 1.0
+        self._vfx_acc = getattr(self, "_vfx_acc", 0.0) + 16.0 * speed
+        steps = int(self._vfx_acc // 16.0)
+        self._vfx_acc -= steps * 16.0
+        alive = rt.tick(steps * 16.0, sub_steps=max(1, steps)) if steps else rt.active()
+        if alive:
+            try:
+                self.view._last_sig = None
+                self.view.redraw()
+            except Exception:  # noqa: BLE001
+                pass
+            self._vfx_after = self.after(16, self._vfx_tick)
+        else:
+            self._vfx_btn_play.config(text="▶")
+
+    def _vfx_sync_anchors(self):
+        pid = getattr(self, "_vfx_sel_part", None)
+        if pid is not None:
+            self._vfx_refresh_card()
+        rt = getattr(self, "_vfx_rt", None)
+        h = getattr(self, "_vfx_handle", None)
+        if rt is not None and h is not None:
+            origin, basis = self._vfx_anchor(pid) if pid is not None else (None, None)
+            if origin is not None:
+                rt.set_anchor(h, origin, basis)
+
+    def _vfx_apply_manual(self):
+        s = getattr(self, "_vfx_sel_slot", None)
+        name = (self._vfx_combo.get() or "").strip().lower()
+        if not name:
+            return
+        if s and (s["tag"] or ""):
+            if self._vfx_write.get():
+                rpg = self._xml_root.find(".//RPG") if self._xml_root is not None else None
+                if rpg is not None:
+                    el = rpg.find(s["tag"])
+                    if el is None:
+                        el = ET.SubElement(rpg, s["tag"])
+                    el.text = name
+                    self._xml_dirty = True
+                    self.set_status("已写入 XML（记得点保存）")
+                    self._vfx_rebuild_slots()
+        self._vfx_play_effect(name, s["part_id"] if s else None)
+
+    def _vfx_pick_dir(self):
+        d = filedialog.askdirectory(title="选择游戏根目录或 data 目录")
+        if not d:
+            return
+        self.prefs["fx_data_roots"] = [d]
+        try:
+            self._prefs_save()
+        except Exception:  # noqa: BLE001
+            pass
+        self._vfx_rt = None
+        self._vfx_fs = None
+        self._vfx_db = None
+        self._vfx_status.config(text="正在扫描…")
+        self.update_idletasks()
+        names = self._vfx_load_effects()
+        self._vfx_status.config(text="{} 个特效".format(len(names)))
+        self._vfx_rebuild_slots()
+        self.set_status("已加载特效库：{} 个".format(len(names)))
+
+    def _build_vfx_page(self, parent):
+        p = self.px
+        head = tk.Frame(parent, bg="#f0f0f0")
+        head.pack(fill="x", padx=p(6), pady=(p(4), p(2)))
+        self._vfx_lb_name = tk.Label(head, text="未选中定位器", anchor="w", bg="#f0f0f0",
+                                     font=("Microsoft YaHei UI", 10, "bold"))
+        self._vfx_lb_name.pack(fill="x")
+        self._vfx_lb_meta = tk.Label(head, text="", anchor="w", bg="#f0f0f0", fg="#555555",
+                                     font=("Microsoft YaHei UI", 8))
+        self._vfx_lb_meta.pack(fill="x")
+        self._vfx_lb_eff = tk.Label(head, text="", anchor="w", bg="#f0f0f0", fg="#2a6a2a",
+                                    font=("Microsoft YaHei UI", 8), wraplength=p(280),
+                                    justify="left")
+        self._vfx_lb_eff.pack(fill="x")
+
+        bar = tk.Frame(parent, bg="#f0f0f0")
+        bar.pack(fill="x", padx=p(6), pady=p(2))
+        self._vfx_btn_play = tk.Button(bar, text="▶", width=3, state="disabled",
+                                       command=self._vfx_toggle_play,
+                                       font=("Microsoft YaHei UI", 9))
+        self._vfx_btn_play.pack(side="left")
+        tk.Button(bar, text="■", width=3, command=self._vfx_stop,
+                  font=("Microsoft YaHei UI", 9)).pack(side="left", padx=(p(4), 0))
+        self._vfx_loop = tk.BooleanVar(value=False)
+        tk.Checkbutton(bar, text="循环", variable=self._vfx_loop, bg="#f0f0f0",
+                       activebackground="#f0f0f0",
+                       font=("Microsoft YaHei UI", 9)).pack(side="left", padx=(p(6), 0))
+        self._vfx_speed = ttk.Combobox(bar, values=["0.25x", "0.5x", "1x", "2x"],
+                                       state="readonly", width=5,
+                                       font=("Microsoft YaHei UI", 9))
+        self._vfx_speed.current(2)
+        self._vfx_speed.pack(side="left", padx=(p(6), 0))
+
+        ask = tk.Frame(parent, bg="#fff6e0")
+        self._vfx_ask = ask
+        tk.Label(ask, text="该定位器未关联特效，选一个：", bg="#fff6e0", fg="#7a5a00",
+                 font=("Microsoft YaHei UI", 8)).pack(side="left", padx=(p(4), 2))
+        self._vfx_combo = ttk.Combobox(ask, values=[], width=16,
+                                       font=("Microsoft YaHei UI", 8))
+        self._vfx_combo.pack(side="left")
+        tk.Button(ask, text="播放", width=4, command=self._vfx_apply_manual,
+                  font=("Microsoft YaHei UI", 8)).pack(side="left", padx=2)
+        self._vfx_write = tk.BooleanVar(value=bool(self.prefs.get("fx_writeback", False)))
+        tk.Checkbutton(ask, text="写入 XML", variable=self._vfx_write, bg="#fff6e0",
+                       activebackground="#fff6e0",
+                       font=("Microsoft YaHei UI", 8)).pack(side="left", padx=(p(4), 0))
+
+        cols = ("slot", "loc", "effect", "state")
+        wrap = tk.Frame(parent, bg="#f0f0f0")
+        wrap.pack(fill="both", expand=True, padx=p(6), pady=(p(2), p(2)))
+        self._vfx_tree = ttk.Treeview(wrap, columns=cols, show="headings",
+                                      style="Xml.Treeview", selectmode="browse")
+        for c, t, w in (("slot", "槽位", 60), ("loc", "定位器", 84),
+                        ("effect", "特效", 84), ("state", "状态", 40)):
+            self._vfx_tree.heading(c, text=t)
+            self._vfx_tree.column(c, width=p(w), minwidth=p(36), anchor="w", stretch=True)
+        vs = ttk.Scrollbar(wrap, orient="vertical", command=self._vfx_tree.yview)
+        self._vfx_tree.configure(yscrollcommand=vs.set)
+        self._vfx_tree.pack(side="left", fill="both", expand=True)
+        vs.pack(side="right", fill="y")
+        self._vfx_tree.bind("<<TreeviewSelect>>",
+                            lambda e: self._vfx_play_slot())
+        self._vfx_tree.bind("<Double-Button-1>",
+                            lambda e: self._vfx_play_slot())
+
+        bottom = tk.Frame(parent, bg="#f0f0f0")
+        bottom.pack(fill="x", padx=p(6), pady=(0, p(4)))
+        self._vfx_status = tk.Label(bottom, text="特效库未加载", bg="#f0f0f0", fg="#666666",
+                                    font=("Microsoft YaHei UI", 8))
+        self._vfx_status.pack(side="left")
+        tk.Button(bottom, text="选择游戏目录…", command=self._vfx_pick_dir,
+                  font=("Microsoft YaHei UI", 8)).pack(side="right")
+
+        self._vfx_slots = []
+        self._vfx_slot_map = {}
+        self._vfx_sel_part = None
+        self._vfx_after = None
+        self._vfx_acc = 0.0
+        self._vfx_handle = None
+        self._vfx_rt = None
+        self._vfx_fs = None
+        self._vfx_db = None
+        self._vfx_tex_cache = {}
+
+    def _on_right_tab_changed(self, _evt=None):
+        try:
+            tab = self.right_nb.nametowidget(self.right_nb.select())
+        except Exception:  # noqa: BLE001
+            return
+        if tab is getattr(self, "tab_vfx", None):
+            names = self._vfx_load_effects()
+            if names:
+                self._vfx_combo.configure(values=names)
+                self._vfx_status.config(text="{} 个特效".format(len(names)))
+            try:
+                self.view.focus_set()
+            except Exception:  # noqa: BLE001
+                pass
+
+    def _relang_right_tabs(self):
+        try:
+            self.right_nb.tab(self.tab_vfx, text=tr("特效"))
+            self.right_nb.tab(self.tab_xml, text=tr("XML"))
+        except Exception:  # noqa: BLE001
+            pass
 
     def _xml_check_report(self):
         """检查磁盘上的 xml：语法（带行列）+ 常见结构问题。返回 (errors, warnings, info)。"""
@@ -7473,6 +7990,11 @@ class ModViewer(tk.Tk):
                 locs.append((o.name, M[:3, 3].copy(), M[:3, :3].copy(), o.id))
         self._all_locators = locs
         self.view.set_locators(locs)
+        try:
+            self._vfx_reset()
+            self._vfx_rebuild_slots()
+        except Exception:  # noqa: BLE001
+            pass
         return locs
 
     def add_locator(self, key="main_gun", anchor="CENTER", flip_x=False, parent=None,
@@ -10136,6 +10658,10 @@ class ModViewer(tk.Tk):
             self.view.set_highlights(None, None)
             self._sync_pivot()
             self.refresh_transform_panel()
+            try:
+                self._vfx_on_select(None)
+            except Exception:  # noqa: BLE001
+                pass
             return
         obj = self._obj_by_id_map().get(self.sel_id)
         if obj is None:
@@ -10158,6 +10684,10 @@ class ModViewer(tk.Tk):
             pos = M[:3, 3] if M is not None else np.asarray(obj.location, dtype=float)
             self.set_status("{:>3}  {}  (定位器)   X {:.2f}  Y {:.2f}  Z {:.2f}".format(
                 obj.id, obj.name, pos[0], pos[1], pos[2]))
+            try:
+                self._vfx_on_select(obj, pos)
+            except Exception:  # noqa: BLE001
+                pass
             return
 
         loc_others = [by_id[i].name for i in getattr(self, "sel_ids", ())
@@ -10168,6 +10698,10 @@ class ModViewer(tk.Tk):
         self.set_status("{:>3}  {}  (网格)   面 {}{}   点行首眼睛可隐藏".format(
             obj.id, obj.name, len(obj.data.faces),
             "   另有 {} 个副选".format(n) if n else ""))
+        try:
+            self._vfx_on_select(None)
+        except Exception:  # noqa: BLE001
+            pass
 
     def on_tex_select(self, _evt=None):
         """单击贴图列表：切换 3D 视口使用的贴图。"""

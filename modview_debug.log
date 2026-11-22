@@ -1051,3 +1051,331 @@
 [17:33:10] 定位器 11 个，线顶点 22 三角顶点 396
 [17:33:10] 定位器 11 个，线顶点 22 三角顶点 396
 [17:33:10] 定位器 11 个，线顶点 22 三角顶点 396
+[18:31:56] ==================================================
+[18:31:56] GLViewport 创建, pid=24264
+[18:31:56] 日志文件: F:\WorkBuddy\2026-11-10-23-52-40\modview-v169\modview_debug.log
+[18:31:56] redraw: 跳过（GL 未就绪）
+[18:31:56] --- _init_gl 开始 ---
+[18:31:56] winfo: 760x520  hwnd=8126998
+[18:31:56] hdc=1224809513
+[18:31:56] STENCIL_BITS = 8
+[18:31:56] GL_VERSION  = b'4.6.0 NVIDIA 621.14'
+[18:31:56] GL_RENDERER = b'NVIDIA GeForce RTX 2080 Ti/PCIe/SSE2'
+[18:31:56] glGetError  = 0
+[18:31:56] 窗口过程已接管，old=140705639808320
+[18:31:56] ready=True, 调用 redraw
+[18:32:06] ==================================================
+[18:32:06] GLViewport 创建, pid=67612
+[18:32:06] 日志文件: F:\WorkBuddy\2026-11-10-23-52-40\modview-v169\modview_debug.log
+[18:32:07] redraw: 跳过（GL 未就绪）
+[18:32:07] --- _init_gl 开始 ---
+[18:32:07] winfo: 760x520  hwnd=23270228
+[18:32:07] hdc=18446744072619104232
+[18:32:07] STENCIL_BITS = 8
+[18:32:07] GL_VERSION  = b'4.6.0 NVIDIA 621.14'
+[18:32:07] GL_RENDERER = b'NVIDIA GeForce RTX 2080 Ti/PCIe/SSE2'
+[18:32:07] glGetError  = 0
+[18:32:07] 窗口过程已接管，old=140705639808320
+[18:32:07] ready=True, 调用 redraw
+[18:32:34] ==================================================
+[18:32:34] GLViewport 创建, pid=7432
+[18:32:34] 日志文件: F:\WorkBuddy\2026-11-10-23-52-40\modview-v169\modview_debug.log
+[18:32:34] redraw: 跳过（GL 未就绪）
+[18:32:34] --- _init_gl 开始 ---
+[18:32:34] winfo: 760x520  hwnd=13311346
+[18:32:34] hdc=18446744072619104232
+[18:32:35] STENCIL_BITS = 8
+[18:32:35] GL_VERSION  = b'4.6.0 NVIDIA 621.14'
+[18:32:35] GL_RENDERER = b'NVIDIA GeForce RTX 2080 Ti/PCIe/SSE2'
+[18:32:35] glGetError  = 0
+[18:32:35] 窗口过程已接管，old=140705639808320
+[18:32:35] ready=True, 调用 redraw
+[18:32:56] ==================================================
+[18:32:56] GLViewport 创建, pid=60812
+[18:32:56] 日志文件: F:\WorkBuddy\2026-11-10-23-52-40\modview-v169\modview_debug.log
+[18:32:56] redraw: 跳过（GL 未就绪）
+[18:32:56] --- _init_gl 开始 ---
+[18:32:56] winfo: 760x520  hwnd=22286472
+[18:32:56] hdc=18446744072300354960
+[18:32:57] STENCIL_BITS = 8
+[18:32:57] GL_VERSION  = b'4.6.0 NVIDIA 621.14'
+[18:32:57] GL_RENDERER = b'NVIDIA GeForce RTX 2080 Ti/PCIe/SSE2'
+[18:32:57] glGetError  = 0
+[18:32:57] 窗口过程已接管，old=140705639808320
+[18:32:57] ready=True, 调用 redraw
+[18:33:21] ==================================================
+[18:33:21] GLViewport 创建, pid=46868
+[18:33:21] 日志文件: F:\WorkBuddy\2026-11-10-23-52-40\modview-v169\modview_debug.log
+[18:33:21] redraw: 跳过（GL 未就绪）
+[18:33:21] --- _init_gl 开始 ---
+[18:33:21] winfo: 760x520  hwnd=17831904
+[18:33:21] hdc=1073824602
+[18:33:22] STENCIL_BITS = 8
+[18:33:22] GL_VERSION  = b'4.6.0 NVIDIA 621.14'
+[18:33:22] GL_RENDERER = b'NVIDIA GeForce RTX 2080 Ti/PCIe/SSE2'
+[18:33:22] glGetError  = 0
+[18:33:22] 窗口过程已接管，old=140705639808320
+[18:33:22] ready=True, 调用 redraw
+[18:35:53] ==================================================
+[18:35:53] GLViewport 创建, pid=27496
+[18:35:53] 日志文件: F:\WorkBuddy\2026-11-10-23-52-40\modview-v169\modview_debug.log
+[18:35:53] redraw: 跳过（GL 未就绪）
+[18:35:53] --- _init_gl 开始 ---
+[18:35:53] winfo: 760x520  hwnd=14425416
+[18:35:53] hdc=251744111
+[18:35:53] STENCIL_BITS = 8
+[18:35:53] GL_VERSION  = b'4.6.0 NVIDIA 621.14'
+[18:35:53] GL_RENDERER = b'NVIDIA GeForce RTX 2080 Ti/PCIe/SSE2'
+[18:35:53] glGetError  = 0
+[18:35:53] 窗口过程已接管，old=140705639808320
+[18:35:53] ready=True, 调用 redraw
+[18:37:25] ==================================================
+[18:37:25] GLViewport 创建, pid=26384
+[18:37:25] 日志文件: F:\WorkBuddy\2026-11-10-23-52-40\modview-v169\modview_debug.log
+[18:37:25] redraw: 跳过（GL 未就绪）
+[18:37:25] --- _init_gl 开始 ---
+[18:37:25] winfo: 760x520  hwnd=22483080
+[18:37:25] hdc=18446744072300354960
+[18:37:25] STENCIL_BITS = 8
+[18:37:25] GL_VERSION  = b'4.6.0 NVIDIA 621.14'
+[18:37:25] GL_RENDERER = b'NVIDIA GeForce RTX 2080 Ti/PCIe/SSE2'
+[18:37:25] glGetError  = 0
+[18:37:25] 窗口过程已接管，old=140705639808320
+[18:37:25] ready=True, 调用 redraw
+[18:38:06] ==================================================
+[18:38:06] GLViewport 创建, pid=11084
+[18:38:06] 日志文件: F:\WorkBuddy\2026-11-10-23-52-40\modview-v169\modview_debug.log
+[18:38:06] redraw: 跳过（GL 未就绪）
+[18:38:07] --- _init_gl 开始 ---
+[18:38:07] winfo: 760x520  hwnd=8266610
+[18:38:07] hdc=251744111
+[18:38:07] STENCIL_BITS = 8
+[18:38:07] GL_VERSION  = b'4.6.0 NVIDIA 621.14'
+[18:38:07] GL_RENDERER = b'NVIDIA GeForce RTX 2080 Ti/PCIe/SSE2'
+[18:38:07] glGetError  = 0
+[18:38:07] 窗口过程已接管，old=140705639808320
+[18:38:07] ready=True, 调用 redraw
+[18:41:38] ==================================================
+[18:41:38] GLViewport 创建, pid=69876
+[18:41:38] 日志文件: F:\WorkBuddy\2026-11-10-23-52-40\modview-v169\modview_debug.log
+[18:41:39] redraw: 跳过（GL 未就绪）
+[18:41:39] --- _init_gl 开始 ---
+[18:41:39] winfo: 760x520  hwnd=52299736
+[18:41:39] hdc=18446744072786887030
+[18:41:39] STENCIL_BITS = 8
+[18:41:39] GL_VERSION  = b'4.6.0 NVIDIA 621.14'
+[18:41:39] GL_RENDERER = b'NVIDIA GeForce RTX 2080 Ti/PCIe/SSE2'
+[18:41:39] glGetError  = 0
+[18:41:39] 窗口过程已接管，old=140705639808320
+[18:41:39] ready=True, 调用 redraw
+[18:45:04] ==================================================
+[18:45:04] GLViewport 创建, pid=72396
+[18:45:04] 日志文件: F:\WorkBuddy\2026-11-10-23-52-40\modview-v169\modview_debug.log
+[18:45:04] redraw: 跳过（GL 未就绪）
+[18:45:04] --- _init_gl 开始 ---
+[18:45:04] winfo: 760x520  hwnd=35592242
+[18:45:04] hdc=18446744072837227503
+[18:45:04] STENCIL_BITS = 8
+[18:45:04] GL_VERSION  = b'4.6.0 NVIDIA 621.14'
+[18:45:04] GL_RENDERER = b'NVIDIA GeForce RTX 2080 Ti/PCIe/SSE2'
+[18:45:04] glGetError  = 0
+[18:45:04] 窗口过程已接管，old=140705639808320
+[18:45:04] ready=True, 调用 redraw
+[18:47:42] ==================================================
+[18:47:42] GLViewport 创建, pid=24896
+[18:47:42] 日志文件: F:\WorkBuddy\2026-11-10-23-52-40\modview-v169\modview_debug.log
+[18:47:42] redraw: 跳过（GL 未就绪）
+[18:47:42] --- _init_gl 开始 ---
+[18:47:42] winfo: 760x520  hwnd=18814148
+[18:47:42] hdc=18446744072786887030
+[18:47:43] STENCIL_BITS = 8
+[18:47:43] GL_VERSION  = b'4.6.0 NVIDIA 621.14'
+[18:47:43] GL_RENDERER = b'NVIDIA GeForce RTX 2080 Ti/PCIe/SSE2'
+[18:47:43] glGetError  = 0
+[18:47:43] 窗口过程已接管，old=140705639808320
+[18:47:43] ready=True, 调用 redraw
+[18:48:33] ==================================================
+[18:48:33] GLViewport 创建, pid=54004
+[18:48:33] 日志文件: F:\WorkBuddy\2026-11-10-23-52-40\modview-v169\modview_debug.log
+[18:48:33] redraw: 跳过（GL 未就绪）
+[18:48:34] --- _init_gl 开始 ---
+[18:48:34] winfo: 760x520  hwnd=15669414
+[18:48:34] hdc=738286431
+[18:48:34] STENCIL_BITS = 8
+[18:48:34] GL_VERSION  = b'4.6.0 NVIDIA 621.14'
+[18:48:34] GL_RENDERER = b'NVIDIA GeForce RTX 2080 Ti/PCIe/SSE2'
+[18:48:34] glGetError  = 0
+[18:48:34] 窗口过程已接管，old=140705639808320
+[18:48:34] ready=True, 调用 redraw
+[18:51:33] ==================================================
+[18:51:33] GLViewport 创建, pid=31416
+[18:51:33] 日志文件: F:\WorkBuddy\2026-11-10-23-52-40\modview-v169\modview_debug.log
+[18:51:33] redraw: 跳过（GL 未就绪）
+[18:51:33] redraw: 跳过（GL 未就绪）
+[18:51:33] redraw: 跳过（GL 未就绪）
+[18:51:33] --- _init_gl 开始 ---
+[18:51:33] redraw: 跳过（GL 未就绪）
+[18:51:33] winfo: 1736x1120  hwnd=82058570
+[18:51:33] hdc=18446744072786887030
+[18:51:33] STENCIL_BITS = 8
+[18:51:33] GL_VERSION  = b'4.6.0 NVIDIA 621.14'
+[18:51:33] GL_RENDERER = b'NVIDIA GeForce RTX 2080 Ti/PCIe/SSE2'
+[18:51:33] glGetError  = 0
+[18:51:33] 窗口过程已接管，old=140705639808320
+[18:51:33] ready=True, 调用 redraw
+============================================================
+[2026-11-22 18:51:34] === 新会话 / 打开单位 ===
+[18:51:34] 单位: USSR-T80B-1982
+[18:51:34] .mod: C:\Users\Administrator\Desktop\新建文件夹\blender 订单\9.27\临时转换\新建文件夹\问题单位\USSR-T80B-1982    （空梦制作定稿 转21CCmod用）\1.mod
+[18:51:34] 版本: v6.21  (手柄只在移动/旋转/缩放工具下显示，选择与相连面工具不画)
+[18:51:34] 对象: 27 个（网格 16）
+============================================================
+[18:51:34] 开始上传 16 个网格
+[18:51:34]   上传 Tracks: verts=176->216 faces=328 has_uv=True
+[18:51:34]   上传 FrontWheels01: verts=32->64 faces=56 has_uv=True
+[18:51:34]   上传 FrontWheels02: verts=32->64 faces=56 has_uv=True
+[18:51:34]   上传 FrontWheels03: verts=96->160 faces=184 has_uv=True
+[18:51:34]   上传 FrontWheels04: verts=96->160 faces=184 has_uv=True
+[18:51:34]   上传 FrontWheels05: verts=96->160 faces=184 has_uv=True
+[18:51:34]   上传 FrontWheels06: verts=96->160 faces=184 has_uv=True
+[18:51:34]   上传 FrontWheels07: verts=96->160 faces=184 has_uv=True
+[18:51:34]   上传 FrontWheels08: verts=96->160 faces=184 has_uv=True
+[18:51:34]   上传 Basis: verts=1017->1363 faces=1783 has_uv=True
+[18:51:34]   上传 Turret: verts=386->602 faces=621 has_uv=True
+[18:51:34]   上传 GunCarriage: verts=52->52 faces=94 has_uv=True
+[18:51:34]   上传 Turret2: verts=150->158 faces=259 has_uv=True
+[18:51:34]   上传 Compl: verts=900->1052 faces=1540 has_uv=True
+[18:51:34]   上传 MainBarrel: verts=224->240 faces=428 has_uv=True
+[18:51:34]   上传 HMG: verts=672->696 faces=1201 has_uv=True
+[18:51:34] 定位器 11 个，线顶点 22 三角顶点 396
+[18:51:34] 定位器 11 个，线顶点 22 三角顶点 396
+[18:51:35] 定位器 11 个，线顶点 22 三角顶点 396
+[18:52:29] ==================================================
+[18:52:29] GLViewport 创建, pid=3568
+[18:52:29] 日志文件: F:\WorkBuddy\2026-11-10-23-52-40\modview-v169\modview_debug.log
+[18:52:29] redraw: 跳过（GL 未就绪）
+[18:52:29] redraw: 跳过（GL 未就绪）
+[18:52:29] redraw: 跳过（GL 未就绪）
+[18:52:30] --- _init_gl 开始 ---
+[18:52:30] redraw: 跳过（GL 未就绪）
+[18:52:30] winfo: 1736x1120  hwnd=28966984
+[18:52:30] hdc=18446744072786887030
+[18:52:30] STENCIL_BITS = 8
+[18:52:30] GL_VERSION  = b'4.6.0 NVIDIA 621.14'
+[18:52:30] GL_RENDERER = b'NVIDIA GeForce RTX 2080 Ti/PCIe/SSE2'
+[18:52:30] glGetError  = 0
+[18:52:30] 窗口过程已接管，old=140705639808320
+[18:52:30] ready=True, 调用 redraw
+============================================================
+[2026-11-22 18:52:30] === 新会话 / 打开单位 ===
+[18:52:30] 单位: USSR-T80B-1982
+[18:52:30] .mod: C:\Users\Administrator\Desktop\新建文件夹\blender 订单\9.27\临时转换\新建文件夹\问题单位\USSR-T80B-1982    （空梦制作定稿 转21CCmod用）\1.mod
+[18:52:30] 版本: v6.21  (手柄只在移动/旋转/缩放工具下显示，选择与相连面工具不画)
+[18:52:30] 对象: 27 个（网格 16）
+============================================================
+[18:52:30] 开始上传 16 个网格
+[18:52:30]   上传 Tracks: verts=176->216 faces=328 has_uv=True
+[18:52:30]   上传 FrontWheels01: verts=32->64 faces=56 has_uv=True
+[18:52:30]   上传 FrontWheels02: verts=32->64 faces=56 has_uv=True
+[18:52:30]   上传 FrontWheels03: verts=96->160 faces=184 has_uv=True
+[18:52:30]   上传 FrontWheels04: verts=96->160 faces=184 has_uv=True
+[18:52:30]   上传 FrontWheels05: verts=96->160 faces=184 has_uv=True
+[18:52:30]   上传 FrontWheels06: verts=96->160 faces=184 has_uv=True
+[18:52:30]   上传 FrontWheels07: verts=96->160 faces=184 has_uv=True
+[18:52:30]   上传 FrontWheels08: verts=96->160 faces=184 has_uv=True
+[18:52:30]   上传 Basis: verts=1017->1363 faces=1783 has_uv=True
+[18:52:30]   上传 Turret: verts=386->602 faces=621 has_uv=True
+[18:52:30]   上传 GunCarriage: verts=52->52 faces=94 has_uv=True
+[18:52:30]   上传 Turret2: verts=150->158 faces=259 has_uv=True
+[18:52:30]   上传 Compl: verts=900->1052 faces=1540 has_uv=True
+[18:52:30]   上传 MainBarrel: verts=224->240 faces=428 has_uv=True
+[18:52:30]   上传 HMG: verts=672->696 faces=1201 has_uv=True
+[18:52:30] 定位器 11 个，线顶点 22 三角顶点 396
+[18:52:30] 定位器 11 个，线顶点 22 三角顶点 396
+[18:52:31] 定位器 11 个，线顶点 22 三角顶点 396
+[18:52:59] ==================================================
+[18:52:59] GLViewport 创建, pid=48788
+[18:52:59] 日志文件: F:\WorkBuddy\2026-11-10-23-52-40\modview-v169\modview_debug.log
+[18:52:59] redraw: 跳过（GL 未就绪）
+[18:52:59] redraw: 跳过（GL 未就绪）
+[18:52:59] redraw: 跳过（GL 未就绪）
+[18:52:59] --- _init_gl 开始 ---
+[18:52:59] redraw: 跳过（GL 未就绪）
+[18:52:59] winfo: 1736x1120  hwnd=11474212
+[18:52:59] hdc=620842636
+[18:53:00] STENCIL_BITS = 8
+[18:53:00] GL_VERSION  = b'4.6.0 NVIDIA 621.14'
+[18:53:00] GL_RENDERER = b'NVIDIA GeForce RTX 2080 Ti/PCIe/SSE2'
+[18:53:00] glGetError  = 0
+[18:53:00] 窗口过程已接管，old=140705639808320
+[18:53:00] ready=True, 调用 redraw
+============================================================
+[2026-11-22 18:53:00] === 新会话 / 打开单位 ===
+[18:53:00] 单位: USSR-T80B-1982
+[18:53:00] .mod: C:\Users\Administrator\Desktop\新建文件夹\blender 订单\9.27\临时转换\新建文件夹\问题单位\USSR-T80B-1982    （空梦制作定稿 转21CCmod用）\1.mod
+[18:53:00] 版本: v6.21  (手柄只在移动/旋转/缩放工具下显示，选择与相连面工具不画)
+[18:53:00] 对象: 27 个（网格 16）
+============================================================
+[18:53:00] 开始上传 16 个网格
+[18:53:00]   上传 Tracks: verts=176->216 faces=328 has_uv=True
+[18:53:00]   上传 FrontWheels01: verts=32->64 faces=56 has_uv=True
+[18:53:00]   上传 FrontWheels02: verts=32->64 faces=56 has_uv=True
+[18:53:00]   上传 FrontWheels03: verts=96->160 faces=184 has_uv=True
+[18:53:00]   上传 FrontWheels04: verts=96->160 faces=184 has_uv=True
+[18:53:00]   上传 FrontWheels05: verts=96->160 faces=184 has_uv=True
+[18:53:00]   上传 FrontWheels06: verts=96->160 faces=184 has_uv=True
+[18:53:00]   上传 FrontWheels07: verts=96->160 faces=184 has_uv=True
+[18:53:00]   上传 FrontWheels08: verts=96->160 faces=184 has_uv=True
+[18:53:00]   上传 Basis: verts=1017->1363 faces=1783 has_uv=True
+[18:53:00]   上传 Turret: verts=386->602 faces=621 has_uv=True
+[18:53:00]   上传 GunCarriage: verts=52->52 faces=94 has_uv=True
+[18:53:00]   上传 Turret2: verts=150->158 faces=259 has_uv=True
+[18:53:00]   上传 Compl: verts=900->1052 faces=1540 has_uv=True
+[18:53:00]   上传 MainBarrel: verts=224->240 faces=428 has_uv=True
+[18:53:00]   上传 HMG: verts=672->696 faces=1201 has_uv=True
+[18:53:00] 定位器 11 个，线顶点 22 三角顶点 396
+[18:53:00] 定位器 11 个，线顶点 22 三角顶点 396
+[18:53:01] 定位器 11 个，线顶点 22 三角顶点 396
+[18:53:28] ==================================================
+[18:53:28] GLViewport 创建, pid=49216
+[18:53:28] 日志文件: F:\WorkBuddy\2026-11-10-23-52-40\modview-v169\modview_debug.log
+[18:53:28] redraw: 跳过（GL 未就绪）
+[18:53:28] redraw: 跳过（GL 未就绪）
+[18:53:28] redraw: 跳过（GL 未就绪）
+[18:53:28] --- _init_gl 开始 ---
+[18:53:28] redraw: 跳过（GL 未就绪）
+[18:53:28] winfo: 1736x1120  hwnd=20583904
+[18:53:28] hdc=822152375
+[18:53:28] STENCIL_BITS = 8
+[18:53:28] GL_VERSION  = b'4.6.0 NVIDIA 621.14'
+[18:53:28] GL_RENDERER = b'NVIDIA GeForce RTX 2080 Ti/PCIe/SSE2'
+[18:53:28] glGetError  = 0
+[18:53:28] 窗口过程已接管，old=140705639808320
+[18:53:28] ready=True, 调用 redraw
+============================================================
+[2026-11-22 18:53:29] === 新会话 / 打开单位 ===
+[18:53:29] 单位: USSR-T80B-1982
+[18:53:29] .mod: C:\Users\Administrator\Desktop\新建文件夹\blender 订单\9.27\临时转换\新建文件夹\问题单位\USSR-T80B-1982    （空梦制作定稿 转21CCmod用）\1.mod
+[18:53:29] 版本: v6.21  (手柄只在移动/旋转/缩放工具下显示，选择与相连面工具不画)
+[18:53:29] 对象: 27 个（网格 16）
+============================================================
+[18:53:29] 开始上传 16 个网格
+[18:53:29]   上传 Tracks: verts=176->216 faces=328 has_uv=True
+[18:53:29]   上传 FrontWheels01: verts=32->64 faces=56 has_uv=True
+[18:53:29]   上传 FrontWheels02: verts=32->64 faces=56 has_uv=True
+[18:53:29]   上传 FrontWheels03: verts=96->160 faces=184 has_uv=True
+[18:53:29]   上传 FrontWheels04: verts=96->160 faces=184 has_uv=True
+[18:53:29]   上传 FrontWheels05: verts=96->160 faces=184 has_uv=True
+[18:53:29]   上传 FrontWheels06: verts=96->160 faces=184 has_uv=True
+[18:53:29]   上传 FrontWheels07: verts=96->160 faces=184 has_uv=True
+[18:53:29]   上传 FrontWheels08: verts=96->160 faces=184 has_uv=True
+[18:53:29]   上传 Basis: verts=1017->1363 faces=1783 has_uv=True
+[18:53:29]   上传 Turret: verts=386->602 faces=621 has_uv=True
+[18:53:29]   上传 GunCarriage: verts=52->52 faces=94 has_uv=True
+[18:53:29]   上传 Turret2: verts=150->158 faces=259 has_uv=True
+[18:53:29]   上传 Compl: verts=900->1052 faces=1540 has_uv=True
+[18:53:29]   上传 MainBarrel: verts=224->240 faces=428 has_uv=True
+[18:53:29]   上传 HMG: verts=672->696 faces=1201 has_uv=True
+[18:53:29] 定位器 11 个，线顶点 22 三角顶点 396
+[18:53:29] 定位器 11 个，线顶点 22 三角顶点 396
+[18:53:30] 定位器 11 个，线顶点 22 三角顶点 396

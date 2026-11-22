@@ -287,6 +287,10 @@ class GLViewport(tk.Frame):
         self.on_uv_gz_end = None
         self._uv_down = None
         self._tex_id = 0
+        # ---- 特效（粒子）相关：独立纹理槽，不碰模型贴图
+        self.fx = None
+        self._fx_tex = {}          # tex_key -> {"id": gl_id, "w": w, "h": h}
+        self._fx_tex_loader = None # callable(tex_key) -> (w, h, rgba) | None
         self._tex_key = None
 
         # 高亮 / 隐藏
@@ -2649,7 +2653,8 @@ class GLViewport(tk.Frame):
                self.tool,
                None if self.pivot is None else tuple(np.round(np.asarray(self.pivot, float), 4)),
                self._gz_hover, getattr(self, "tb_hover", None),
-               getattr(self, "view_mode", "3d"))
+               getattr(self, "view_mode", "3d"),
+               bool(self.fx is not None and self.fx.active()))
         if not force and sig == self._last_sig:
             if DEBUG_FRAME:
                 dlog("redraw: 跳过（相机未变）")
@@ -2804,6 +2809,7 @@ class GLViewport(tk.Frame):
             GL.glDisable(GL.GL_BLEND)
             GL.glEnable(GL.GL_LIGHTING)
 
+        self._fx_draw(w, h)
         self._draw_aabbs()
         self._draw_locators()
         self._gz_draw(w, h)
@@ -3385,6 +3391,126 @@ class GLViewport(tk.Frame):
         sy = (1.0 - ndc[:, 1]) * 0.5 * h
         return sx, sy, ok
 
+    def _project_points_depth(self, pts):
+        """世界坐标 -> (屏幕 x, 屏幕 y, ndc z, 是否在相机前方)。"""
+        w, h = self.winfo_width(), self.winfo_height()
+        m = self._view_matrix()
+        pts = np.asarray(pts, dtype=float).reshape(-1, 3)
+        q = np.hstack([pts, np.ones((len(pts), 1))]) @ m.T
+        cw = q[:, 3]
+        ok = cw > 1e-6
+        safe = np.where(ok, cw, 1.0)
+        ndc = q[:, :3] / safe[:, None]
+        sx = (ndc[:, 0] + 1.0) * 0.5 * w
+        sy = (1.0 - ndc[:, 1]) * 0.5 * h
+        return sx, sy, ndc[:, 2], ok
+
+    # ---------------------------------------------------------------- 特效
+    def set_fx_system(self, fx, loader=None):
+        """由 app 注入粒子系统；loader(tex_key) -> (w, h, rgba) 用于懒上传贴图。"""
+        self.fx = fx
+        self._fx_tex_loader = loader
+        self._last_sig = None
+
+    def _fx_texture(self, key):
+        ent = self._fx_tex.get(key)
+        if ent is not None:
+            return ent["id"]
+        if self._fx_tex_loader is None:
+            return 0
+        try:
+            got = self._fx_tex_loader(key)
+        except Exception:  # noqa: BLE001
+            got = None
+        if not got:
+            return 0
+        w, h, arr = got
+        arr = np.ascontiguousarray(np.asarray(arr, np.uint8))
+        if arr.ndim != 3 or arr.shape[2] < 3:
+            return 0
+        if arr.shape[2] == 3:
+            alpha = np.full((arr.shape[0], arr.shape[1], 1), 255, np.uint8)
+            arr = np.concatenate([arr, alpha], axis=2)
+        gid = GL.glGenTextures(1)
+        GL.glBindTexture(GL.GL_TEXTURE_2D, gid)
+        GL.glPixelStorei(GL.GL_UNPACK_ALIGNMENT, 1)
+        GL.glTexImage2D(GL.GL_TEXTURE_2D, 0, GL.GL_RGBA, int(w), int(h), 0,
+                        GL.GL_RGBA, GL.GL_UNSIGNED_BYTE, arr)
+        GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_LINEAR)
+        GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_LINEAR)
+        GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_S, GL.GL_CLAMP_TO_EDGE)
+        GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_T, GL.GL_CLAMP_TO_EDGE)
+        self._fx_tex[key] = {"id": gid, "w": int(w), "h": int(h)}
+        return gid
+
+    def _fx_draw(self, w, h):
+        """屏幕空间公告板：尺寸按像素、alpha 混合、不写/不测深度（与引擎一致）。"""
+        fx = getattr(self, "fx", None)
+        if fx is None or not fx.active():
+            return
+        if getattr(self, "view_mode", "3d") != "3d":
+            return
+        try:
+            def _fx_tex_size(key):
+                ent = self._fx_tex.get(key)
+                return (ent["w"], ent["h"]) if ent else None
+            batches = fx.build_quads(self._project_points_depth, h, _fx_tex_size)
+        except Exception:  # noqa: BLE001
+            return
+        if not batches:
+            return
+
+        GL.glMatrixMode(GL.GL_PROJECTION)
+        GL.glPushMatrix()
+        GL.glLoadIdentity()
+        GL.glOrtho(0, w, 0, h, -1, 1)
+        GL.glMatrixMode(GL.GL_MODELVIEW)
+        GL.glPushMatrix()
+        GL.glLoadIdentity()
+
+        GL.glDisable(GL.GL_DEPTH_TEST)
+        GL.glDepthMask(GL.GL_FALSE)
+        GL.glDisable(GL.GL_LIGHTING)
+        GL.glDisable(GL.GL_CULL_FACE)
+        GL.glEnable(GL.GL_TEXTURE_2D)
+        GL.glTexEnvi(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_MODE, GL.GL_MODULATE)
+        GL.glEnable(GL.GL_BLEND)
+        GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
+        GL.glEnable(GL.GL_ALPHA_TEST)
+        GL.glAlphaFunc(GL.GL_GREATER, 5.0 / 255.0)
+        GL.glEnableClientState(GL.GL_VERTEX_ARRAY)
+        GL.glEnableClientState(GL.GL_TEXTURE_COORD_ARRAY)
+        GL.glEnableClientState(GL.GL_COLOR_ARRAY)
+        try:
+            for key, verts, uvs, colors in batches:
+                tid = self._fx_texture(key)
+                if not tid or not len(verts):
+                    continue
+                GL.glBindTexture(GL.GL_TEXTURE_2D, tid)
+                v = np.ascontiguousarray(verts, np.float32)
+                t = np.ascontiguousarray(uvs, np.float32)
+                c = np.ascontiguousarray(colors, np.float32)
+                GL.glVertexPointer(2, GL.GL_FLOAT, 0,
+                                   v.ctypes.data_as(ctypes.POINTER(ctypes.c_float)))
+                GL.glTexCoordPointer(2, GL.GL_FLOAT, 0,
+                                     t.ctypes.data_as(ctypes.POINTER(ctypes.c_float)))
+                GL.glColorPointer(4, GL.GL_FLOAT, 0,
+                                  c.ctypes.data_as(ctypes.POINTER(ctypes.c_float)))
+                GL.glDrawArrays(GL.GL_TRIANGLES, 0, len(v))
+        finally:
+            GL.glDisableClientState(GL.GL_COLOR_ARRAY)
+            GL.glDisableClientState(GL.GL_TEXTURE_COORD_ARRAY)
+            GL.glDisableClientState(GL.GL_VERTEX_ARRAY)
+            GL.glDisable(GL.GL_ALPHA_TEST)
+            GL.glDepthMask(GL.GL_TRUE)
+            GL.glEnable(GL.GL_DEPTH_TEST)
+            GL.glDisable(GL.GL_TEXTURE_2D)
+            GL.glDisable(GL.GL_BLEND)
+            GL.glEnable(GL.GL_LIGHTING)
+            GL.glMatrixMode(GL.GL_PROJECTION)
+            GL.glPopMatrix()
+            GL.glMatrixMode(GL.GL_MODELVIEW)
+            GL.glPopMatrix()
     @staticmethod
     def _seg_dist(px, py, ax, ay, bx, by):
         dx, dy = bx - ax, by - ay
