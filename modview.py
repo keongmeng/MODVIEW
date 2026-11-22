@@ -1264,7 +1264,7 @@ class Viewport3D(tk.Canvas):
 
 
 # ================================================================ 主窗口
-VERSION = "v6.20  (手柄只在移动/旋转/缩放工具下显示，选择与相连面工具不画)"
+VERSION = "v6.21  (手柄只在移动/旋转/缩放工具下显示，选择与相连面工具不画)"
 
 SPLIT_BG = "#dcdcdc"
 SPLIT_HL = "#a8c8ec"
@@ -8518,7 +8518,8 @@ class ModViewer(tk.Tk):
         tab2.rowconfigure(0, weight=1)
         tab2.columnconfigure(0, weight=1)
 
-        pcols = [("mp", "部件", "ModelPart"),
+        pcols = [("ord", "序 ▲▼", ""),
+                 ("mp", "部件", "ModelPart"),
                  ("hs", "水平转速", "HorizontalRotationSpeed"),
                  ("hmin", "水平 Min°", "Constraint.Min"),
                  ("hmax", "Max°", "Constraint.Max"),
@@ -8575,18 +8576,31 @@ class ModViewer(tk.Tk):
                 }
                 rows.append(rec)
 
+                # 序：↑↓ 调 <Platforms> 顺序（引擎按平台顺序建旋转链，父平台必须在子平台前面）
                 f = ptab.cell(0, row)
+                obox = tk.Frame(f, bg="#ececed")
+                tk.Button(obox, text="▲", width=1, relief="flat", bd=0,
+                          padx=0, highlightthickness=0, takefocus=0,
+                          font=("Microsoft YaHei UI", 9),
+                          command=lambda e=it: move_platform(e, -1)).pack(side="left")
+                tk.Button(obox, text="▼", width=1, relief="flat", bd=0,
+                          padx=0, highlightthickness=0, takefocus=0,
+                          font=("Microsoft YaHei UI", 9),
+                          command=lambda e=it: move_platform(e, 1)).pack(side="left")
+                ptab.set_content(f, obox)
+
+                f = ptab.cell(1, row)
                 mp_box = ttk.Combobox(f, textvariable=rec["mp"], values=choices,
                                       state="readonly", width=12,
                                       font=("Microsoft YaHei UI", 9))
                 ptab.set_content(f, mp_box)
-                for ci, key in ((1, "hs"), (2, "hmin"), (3, "hmax"),
-                                (4, "vs"), (5, "vmin"), (6, "vmax")):
+                for ci, key in ((2, "hs"), (3, "hmin"), (4, "hmax"),
+                                (5, "vs"), (6, "vmin"), (7, "vmax")):
                     f = ptab.cell(ci, row)
                     ent = tk.Entry(f, textvariable=rec[key], width=7,
                                   font=("Microsoft YaHei UI", 9))
                     ptab.set_content(f, ent)
-                f = ptab.cell(7, row, flex=True)
+                f = ptab.cell(8, row, flex=True)
                 # 驱动炮：下拉直接选「驱动哪几门」，选中后换算成 FirstGun/NumGuns
                 rec["gun_map"] = self._gun_combos()
                 rec["guns_sel"] = tk.StringVar(value=self._gun_combo_text(rec))
@@ -8599,12 +8613,12 @@ class ModViewer(tk.Tk):
                 rec["combo"] = combo
                 combo.bind("<<ComboboxSelected>>",
                            lambda e, rr=rec: self._on_gun_combo(rr))
-                f = ptab.cell(8, row, flex=True)
+                f = ptab.cell(9, row, flex=True)
                 chk_lbl = tk.Label(f, text="", bg="#ececed",
                                    font=("Microsoft YaHei UI", 9))
                 chk_lbl.pack(anchor="w")
                 rec["chk"] = chk_lbl
-                f = ptab.cell(9, row)
+                f = ptab.cell(10, row)
                 tk.Button(f, text="×", width=2, relief="flat",
                           command=lambda e=it: del_platform(e)).pack(anchor="w")
                 mp_box.bind("<<ComboboxSelected>>",
@@ -8633,6 +8647,29 @@ class ModViewer(tk.Tk):
             build_platform_rows()
             ptab.measure()
             ptab.apply()
+
+        def move_platform(el, delta):
+            """把某个平台上移/下移一位（改 <Platforms> 里的元素顺序）。"""
+            kids = list(plats)
+            try:
+                i = kids.index(el)
+            except ValueError:
+                return
+            j = i + int(delta)
+            if j < 0 or j >= len(kids):
+                return
+            plats.remove(el)
+            plats.insert(j, el)
+            build_platform_rows()
+            ptab.measure()
+            ptab.apply()
+            self._xml_dirty = True
+            try:
+                self._refresh_xml_title()
+            except Exception:  # noqa: BLE001
+                pass
+            self.set_status("平台顺序：第 {} 位 ↔ 第 {} 位（父平台要在子平台前面；"
+                            "驱动炮区间建议点『按模型重算驱动炮』刷新）".format(i + 1, j + 1))
 
         def add_platform():
             el = ET.SubElement(plats, "item", {
