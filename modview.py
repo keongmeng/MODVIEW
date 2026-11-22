@@ -1263,7 +1263,7 @@ class Viewport3D(tk.Canvas):
 
 
 # ================================================================ 主窗口
-VERSION = "v6.15  (手柄只在移动/旋转/缩放工具下显示，选择与相连面工具不画)"
+VERSION = "v6.16  (手柄只在移动/旋转/缩放工具下显示，选择与相连面工具不画)"
 
 SPLIT_BG = "#dcdcdc"
 SPLIT_HL = "#a8c8ec"
@@ -4774,6 +4774,7 @@ class ModViewer(tk.Tk):
         # 保存前跑一次结构检查：<Guns> 顺序错位之类的会让游戏直接闪退
         try:
             e2, _w2 = self._xml_check_guns(self._xml_root)
+            e2 = list(e2) + list(self._xml_check_platforms(self._xml_root))
         except Exception:  # noqa: BLE001
             e2 = []
         if e2:
@@ -4802,6 +4803,48 @@ class ModViewer(tk.Tk):
         self._xml_dirty = False
         self._refresh_xml_title()
         self.set_status("已保存 {}".format(os.path.basename(self._xml_path)))
+
+    def _xml_check_platforms(self, root):
+        """<Platforms> 的顺序检查：父平台必须排在子平台之前。
+
+        引擎按这个顺序建立旋转链（车体 → 炮塔 → 指挥塔…），
+        把子平台提到父平台前面，轻则转轴挂错，重则加载闪退。
+        """
+        errors = []
+        plats_el = root.find(".//Platforms")
+        if plats_el is None:
+            return errors
+        parts = []
+        for i, pl in enumerate(list(plats_el)):
+            try:
+                parts.append((i, int((pl.get("ModelPart") or "-1").strip())))
+            except ValueError:
+                errors.append("第 {} 个平台的 ModelPart 不是整数".format(i + 1))
+                parts.append((i, -1))
+        idx = {mp: i for i, mp in parts if mp >= 0}
+
+        parent = {}
+        for o in (self.scene.objects if self.scene else []):
+            for c in (getattr(o, "children_ids", None) or []):
+                try:
+                    parent[int(c)] = int(o.id)
+                except (TypeError, ValueError):
+                    pass
+
+        for i, mp in parts:
+            if mp < 0:
+                continue
+            cur, seen = parent.get(mp), set()
+            while cur is not None and cur not in seen:
+                seen.add(cur)
+                if cur in idx and idx[cur] > i:
+                    errors.append(
+                        "平台 {}（ModelPart={}）排在了它的父平台 ModelPart={}（第 {} 个）之后 —— "
+                        "平台必须按层级「父在前、子在后」排列".format(
+                            i + 1, mp, cur, idx[cur] + 1))
+                    break
+                cur = parent.get(cur)
+        return errors
 
     def _xml_check_guns(self, root):
         """<Guns> / <Platforms> 的语义检查（顺序错位会让引擎直接闪退）。
@@ -4956,6 +4999,10 @@ class ModViewer(tk.Tk):
             e2, w2 = self._xml_check_guns(root)
             errors.extend(e2)
             warnings.extend(w2)
+        except Exception:  # noqa: BLE001
+            pass
+        try:
+            errors.extend(self._xml_check_platforms(root))
         except Exception:  # noqa: BLE001
             pass
 
