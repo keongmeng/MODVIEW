@@ -1271,7 +1271,7 @@ class Viewport3D(tk.Canvas):
 
 
 # ================================================================ 主窗口
-VERSION = "v6.22  (手柄只在移动/旋转/缩放工具下显示，选择与相连面工具不画)"
+VERSION = "v6.23  (手柄只在移动/旋转/缩放工具下显示，选择与相连面工具不画)"
 
 SPLIT_BG = "#dcdcdc"
 SPLIT_HL = "#a8c8ec"
@@ -5210,6 +5210,7 @@ class ModViewer(tk.Tk):
         self._vfx_sel_part = pid
         tree = getattr(self, "_vfx_tree", None)
         if tree is not None:
+            self._vfx_guard = True
             try:
                 tree.selection_remove(*tree.selection())
                 if pid is not None:
@@ -5218,6 +5219,8 @@ class ModViewer(tk.Tk):
                             tree.selection_add(s["key"])
             except Exception:  # noqa: BLE001
                 pass
+            finally:
+                self._vfx_guard = False
         if hasattr(self, "_vfx_lb_name"):
             self._vfx_refresh_card()
             if pid is not None and not getattr(self, "_xml_open", True):
@@ -5263,10 +5266,21 @@ class ModViewer(tk.Tk):
         return np.asarray(M[:3, 3], float), np.asarray(M[:3, :3], float)
 
     def _vfx_play_slot(self, key=None):
+        if getattr(self, "_vfx_guard", False):
+            return
         key = key or (self._vfx_tree.selection() or [None])[0]
         s = getattr(self, "_vfx_slot_map", {}).get(key)
         if not s:
             return
+        # 点表格行时同步选中状态，让卡片/视口高亮跟着走
+        pid = s.get("part_id", -1)
+        if pid is not None and pid >= 0:
+            try:
+                self.sel_id = pid
+                self.sel_ids = {pid}
+                self.on_select()
+            except Exception:  # noqa: BLE001
+                pass
         self._vfx_play_effect(s["effect"], s["part_id"])
 
     def _vfx_toggle_play(self):

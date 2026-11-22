@@ -49,7 +49,8 @@ class FxSystem(object):
         self.now = 0.0
         self._emitters = []
         self._next_handle = 1
-        self.size_scale = 1.0    # 全局倍率（tab4 可调）
+        self.size_scale = 1.0    # 全局倍率（面板可调）
+        self.zoom = 1.0          # 镜头缩放因子（由视口每帧写入）
 
     # ---------------------------------------------------------------- 控制
     def play(self, eff, origin, basis=None, loop=False, speed=1.0):
@@ -230,7 +231,7 @@ class FxSystem(object):
         if not self.alive.any():
             return []
         idx = np.nonzero(self.alive)[0]
-        px_scale = (float(view_h) / SIZE_REF_HEIGHT) * float(self.size_scale)
+        px_scale = (float(view_h) / SIZE_REF_HEIGHT) * float(self.size_scale) * float(self.zoom)
         for did in np.unique(self.pdef[idx]):
             if did < 0:
                 continue

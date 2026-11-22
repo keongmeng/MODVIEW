@@ -3454,6 +3454,8 @@ class GLViewport(tk.Frame):
             def _fx_tex_size(key):
                 ent = self._fx_tex.get(key)
                 return (ent["w"], ent["h"]) if ent else None
+            ref = max(1.0, float(getattr(self, "_scene_radius", 2.0)) * 2.5)
+            fx.zoom = ref / max(1e-3, float(getattr(self, "dist", 1.0)))
             batches = fx.build_quads(self._project_points_depth, h, _fx_tex_size)
         except Exception:  # noqa: BLE001
             return
