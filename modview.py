@@ -8,6 +8,7 @@
 """
 
 import os
+import re
 import sys
 import math
 import json
@@ -1263,7 +1264,7 @@ class Viewport3D(tk.Canvas):
 
 
 # ================================================================ 主窗口
-VERSION = "v6.17  (手柄只在移动/旋转/缩放工具下显示，选择与相连面工具不画)"
+VERSION = "v6.18  (手柄只在移动/旋转/缩放工具下显示，选择与相连面工具不画)"
 
 SPLIT_BG = "#dcdcdc"
 SPLIT_HL = "#a8c8ec"
@@ -5008,6 +5009,36 @@ class ModViewer(tk.Tk):
                 if lo == lo and hi == hi and lo > hi:
                     warnings.append("平台 {}：{} > {}".format(nm, lo_a, hi_a))
 
+        # 引擎 SMechUnitRPGStats::Validate() 里会「拒绝加载」的硬性条件
+        rpg_el = root.find(".//RPG")
+        if rpg_el is not None:
+            def _num(name, default=None):
+                v = (rpg_el.get(name) or "").strip()
+                try:
+                    return float(v)
+                except (TypeError, ValueError):
+                    return default
+            prio = _num("Priority")
+            if prio is not None and prio <= 0:
+                errors.append("Priority={} —— 引擎要求非步兵单位 Priority > 0，否则拒绝加载"
+                              .format(prio))
+            btr = _num("BoundTileRadius")
+            if btr is not None and btr > 5:
+                errors.append("BoundTileRadius={} —— 引擎要求 <= 5，否则拒绝加载"
+                              .format(btr))
+            hp = _num("MaxHP")
+            if hp is not None and hp <= 0:
+                errors.append("MaxHP={} —— 血量必须 > 0".format(hp))
+
+        # 目录名要和 <KeyName> 一致（引擎按目录名找单位，不一致会加载失败）
+        key_el = root.find(".//KeyName")
+        key = (key_el.text or "").strip() if key_el is not None else ""
+        folder = os.path.basename(os.path.dirname(self._xml_path or ""))
+        # 目录名常带作者备注（"USSR-T80B-1982    （空梦制作定稿…）"），只比对开头那段
+        base = re.split(r"\s{2,}|（|\(", folder, maxsplit=1)[0].strip()
+        if key and base and base.lower() != key.lower():
+            errors.append("目录名「{}」和 <KeyName>「{}」不一致 —— 引擎按目录名加载，会找不到单位"
+                          .format(folder, key))
         try:
             e2, w2 = self._xml_check_guns(root)
             errors.extend(e2)
