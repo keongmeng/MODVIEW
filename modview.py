@@ -1271,7 +1271,7 @@ class Viewport3D(tk.Canvas):
 
 
 # ================================================================ 主窗口
-VERSION = "v6.29  (手柄只在移动/旋转/缩放工具下显示，选择与相连面工具不画)"
+VERSION = "v6.30  (手柄只在移动/旋转/缩放工具下显示，选择与相连面工具不画)"
 
 SPLIT_BG = "#dcdcdc"
 SPLIT_HL = "#a8c8ec"
@@ -5324,6 +5324,28 @@ class ModViewer(tk.Tk):
             return None, None
         return np.asarray(M[:3, 3], float), np.asarray(M[:3, :3], float)
 
+    def _vfx_select_row(self):
+        """表格里点一行：把该槽位的定位器设为当前选中（黄箭头也跟着过去）。"""
+        if getattr(self, "_vfx_guard", False):
+            return
+        sel = self._vfx_tree.selection() if hasattr(self, "_vfx_tree") else ()
+        if not sel:
+            return
+        s = getattr(self, "_vfx_slot_map", {}).get(sel[0])
+        if not s:
+            return
+        pid = s.get("part_id", -1)
+        if pid is None or pid < 0:
+            return
+        prog = getattr(self, "_vfx_prog_sel", None)
+        if prog and set(sel) <= prog:
+            return
+        if pid == getattr(self, "_vfx_sel_part", None):
+            return
+        self.sel_id = pid
+        self.sel_ids = {pid}
+        self.on_select()
+
     def _vfx_play_slot(self, key=None):
         if getattr(self, "_vfx_guard", False):
             return
@@ -5521,7 +5543,10 @@ class ModViewer(tk.Tk):
         self._vfx_tree.configure(yscrollcommand=vs.set)
         self._vfx_tree.pack(side="left", fill="both", expand=True)
         vs.pack(side="right", fill="y")
-        # 选中只做高亮；播放统一走底部时间线的 ▶（避免选中即播、来回触发）
+        # 点表格行 = 选中该槽位的定位器（同步 3D 高亮/卡片），但不自动播放；
+        # 播放仍然只走底部时间线的 ▶
+        self._vfx_tree.bind("<<TreeviewSelect>>",
+                            lambda e: self._vfx_select_row())
 
         bottom = tk.Frame(parent, bg="#f0f0f0")
         bottom.pack(fill="x", padx=p(6), pady=(0, p(4)))
